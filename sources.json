@@ -1,0 +1,20 @@
+[
+	{"source": "support_info.js"},
+	{"source": "app\/assistants\/app-assistant.js"},
+    {"source": "app\/assistants\/stage-assistant.js"},
+    {"source": "app\/classes\/Delicious.js"},
+    {"source": "app\/classes\/Feeds.js"},
+    {"source": "app\/classes\/Omniture.js"},
+    {"source": "app\/classes\/Delicious.Database.js"},
+    {"source": "app\/classes\/Delicious.StageManager.js"},
+    {"source": "app\/classes\/Feeds.Feed.js"},
+    {
+        "scenes": "support",
+        "source": "app\/assistants\/support-assistant.js"
+    },
+    {
+        "scenes": "main",
+        "source": "app\/assistants\/main-assistant.js"
+    }
+    
+]
