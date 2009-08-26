@@ -49,6 +49,43 @@
 	padding: 0px 0px 0px 5px;
 	float:left;
 }
+.palm-page-header.fixed
+{
+	position:fixed;
+	width:100%;
+	top:0px;
+	left:0px;
+	height:52px;
+}
+.palm-page-header.fixed .title
+{
+	font-size:24px;
+	padding: 10px 16px 13px 56px;
+}
+.palm-page-header.fixed:after,.palm-page-header-fixed-after
+{
+	margin-top:54px;
+}
+.palm-page-header-fixed-after-extra
+{
+	margin-top: 68px;
+}
+#addIcon
+{
+	position:absolute;
+	right:10px;
+	top:5px;
+	width:32px; 
+	height:32px;
+	background: url(../images/add_icon.png) no-repeat center ;
+	padding: 10px 5px 0px 0px;
+	float:left;	
+}
+#addIcon:active
+{
+	opacity:0.2;
+}
+
 
 .feedItem
 {
@@ -75,4 +112,35 @@
 	white-space: nowrap;
 	padding:0px;
 	height:50px;
+}
+
+
+
+
+#overNightShade
+{
+	position:absolute;
+	display: block;
+}
+.fullScreen
+{
+	position:absolute;
+	top:0px;
+	left:0px;
+	right:0px;
+	bottom:0px;
+	width:100%;
+	display: block;
+}
+.loader
+{
+	width:31px;
+	height:31px;
+	background: transparent url('../images/loader.gif') center center no-repeat;
+}
+.loading
+{
+	width:128px;
+	height:15px;
+	background: transparent url('../images/loader.gif') center center no-repeat;
 }

@@ -1,12 +1,14 @@
 [
-	{"source": "support_info.js"},
-	{"source": "app\/assistants\/app-assistant.js"},
+    {"source": "support_info.js"},
+    {"source": "app\/assistants\/app-assistant.js"},
     {"source": "app\/assistants\/stage-assistant.js"},
     {"source": "app\/classes\/Delicious.js"},
     {"source": "app\/classes\/Feeds.js"},
     {"source": "app\/classes\/Omniture.js"},
+    {"source": "app\/classes\/Delicious.Assistant.js"},
     {"source": "app\/classes\/Delicious.Database.js"},
     {"source": "app\/classes\/Delicious.StageManager.js"},
+    {"source": "app\/classes\/Feeds.FeedManager.js"},
     {"source": "app\/classes\/Feeds.Feed.js"},
     {
         "scenes": "support",
@@ -15,6 +17,9 @@
     {
         "scenes": "main",
         "source": "app\/assistants\/main-assistant.js"
+    },
+    {
+        "scenes": "add-feed",
+        "source": "app\/assistants\/add-feed-assistant.js"
     }
-    
 ]
