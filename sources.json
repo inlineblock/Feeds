@@ -10,6 +10,9 @@
     {"source": "app\/classes\/Delicious.StageManager.js"},
     {"source": "app\/classes\/Feeds.FeedManager.js"},
     {"source": "app\/classes\/Feeds.Feed.js"},
+    {"source": "app\/classes\/Feeds.Parser.js"},
+    {"source": "app\/classes\/Feeds.RSSParser.js"},
+    {"source": "app\/classes\/Feeds.AtomParser.js"},
     {
         "scenes": "support",
         "source": "app\/assistants\/support-assistant.js"

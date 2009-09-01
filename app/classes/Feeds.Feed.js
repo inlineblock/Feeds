@@ -75,7 +75,7 @@ Feeds.Feed = Class.create({
 	
 	validateFeedSuccess: function(t)
 	{
-		if (!t.responseXML)
+		if (!t.responseXML || !Feeds.Parser.isValid(t.responseXML))
 		{
 			this.callBacks['validateFeed'](false , this);
 			delete this.callBacks['validateFeed'];
