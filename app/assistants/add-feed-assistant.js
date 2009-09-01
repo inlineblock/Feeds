@@ -57,6 +57,35 @@ AddFeedAssistant = Class.create(Delicious.Assistant , {
 			return this.errorDialog($L("You must enter in the feed's url."));
 		}
 		
+		
+		var newFeed = new Feeds.Feed();
+		newFeed.setTitle(this.titleModel.value);
+		if (!newFeed.setFeedURL(this.urlModel.value))
+		{
+			return this.errorDialog($L("Invalid Feed URL."));
+		}
+		
+		
+		this.showLoading();
+		newFeed.validateFeed(this.validateFeed.bind(this));
+	},
+	
+	validateFeed: function(valid , feed)
+	{
+		if (!valid)
+		{
+			this.errorDialog($L("Invalid. Feed URL returns invalid data."));
+			return this.hideLoading();
+		}
+		else
+		{
+			Feeds.Manager.addNewFeed(feed , this.addNewFeedCallBack.bind(this));
+		}
+	},
+	
+	addNewFeedCallBack: function()
+	{
+		this.popScene({refresh: true});
 	}
 	
 	

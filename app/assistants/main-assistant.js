@@ -1,4 +1,5 @@
 MainAssistant = Class.create(Delicious.Assistant , {
+	
 	initialize: function()
 	{
 		this.model = {listTitle: 'Feeds' , items: []};
@@ -25,9 +26,15 @@ MainAssistant = Class.create(Delicious.Assistant , {
 		Feeds.Manager.initTable(this.getFeeds.bind(this));
 	},
 	
-	activate: function()
+	activate: function(o)
 	{
+		var o = o || {};
 		this.addIcon.observe('click' , this.addNewFeed);
+		
+		if (o.refresh)
+		{
+			this.refreshList();
+		}
 	},
 	
 	deactivate: function()

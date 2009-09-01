@@ -37,9 +37,34 @@ Feeds.FeedManager = Class.create({
 		}
 		else
 		{
-			this.callBacks['getFeeds']({success: true , feeds: t.getAll()});
+			var list = t.getAll();
+			var feeds = [];
+			for(var i=0; i < list.length; i++)
+			{
+				var feed = new Feeds.Feed();
+				feed.loadData(list[i]);
+				feeds.push(feed);
+			}
+			this.callBacks['getFeeds']({'success': true , 'feeds': feeds});
 			this.callBacks['getFeeds'] = function() {};
 		}
 	},
+	
+	addNewFeed: function(feed , cB) // takes Feeds.Feed objects only!
+	{
+		this.callBacks['addNewFeed'] = cB || function(){};
+		
+		var query = "INSERT into feeds VALUES ( null , ? , ? , ? , ? );";
+		feed.prepForInsertion();
+		var args = [ feed.title , feed.feedURL , feed.sortOrder , feed.addedTime ];
+		this.db.setQuery(query , args);
+		this.db.execute(this.addNewCallBack.bind(this));
+	},
+	
+	addNewCallBack: function(t , q)
+	{
+		this.callBacks['addNewFeed']();
+		delete this.callBacks['addNewFeed'];
+	}
 
 });
