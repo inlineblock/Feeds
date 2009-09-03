@@ -6,6 +6,7 @@ Feeds.Feed = Class.create({
 	feedURL: false,
 	sortOrder: false,
 	addedTime: false, 
+	parser: null,
 	
 	initialize: function()
 	{
@@ -75,8 +76,10 @@ Feeds.Feed = Class.create({
 	
 	validateFeedSuccess: function(t)
 	{
-		if (!t.responseXML || !Feeds.Parser.isValid(t.responseXML))
+		var parser = null;
+		if (!t.responseXML || !(parser = Feeds.Parser.parse(t.responseXML)))
 		{
+			this.parser = parser;
 			this.callBacks['validateFeed'](false , this);
 			delete this.callBacks['validateFeed'];
 			return;
@@ -96,5 +99,23 @@ Feeds.Feed = Class.create({
 		return;
 	}
 	
+	getArticles: function()
+	{
+		return this.parser && this.parser.getArticles();
+	},
 	
+	getLastUpdated: function()
+	{
+		return this.parser && this.parser.getLastUpdated();
+	},
+	
+	getTitle: function()
+	{
+		return this.title || (this.parser && this.parser.getDescription());
+	},
+	
+	getDescription: function()
+	{
+		return this.parser && this.parser.getDescription();
+	}
 });
