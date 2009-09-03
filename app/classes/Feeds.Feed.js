@@ -72,6 +72,7 @@ Feeds.Feed = Class.create({
 		}
 		
 		var ajax = new Ajax.Request(this.feedURL , {onSuccess: this._validateFeedSuccess , onFailure: this._validateFeedFailure});
+		console.dir(ajax);
 	},
 	
 	validateFeedSuccess: function(t)
@@ -97,7 +98,7 @@ Feeds.Feed = Class.create({
 		this.callBacks['validateFeed'](false , this);
 		delete this.callBacks['validateFeed'];
 		return;
-	}
+	},
 	
 	getArticles: function()
 	{
