@@ -16,7 +16,7 @@ Feeds.Parser = Class.create({
 	getXMLChildText: function(node, tag)
 	{
 		var nodes = n.getElementsByTagName(tag);
-		return nodes.length ? nodes[0].childNodes[0].nodeValue : undefined;
+		return nodes.length ? nodes[0].firstChild.nodeValue : undefined;
 	},
 	
 	getXMLChildAttribute: function(node, tag, att)
@@ -31,6 +31,7 @@ Feeds.Parser.isValid = function(xml)
 	var parsers = this.parsers;
 	for (var type in parsers)
 	{
+		console.log('trying type: ' + type);
 		if (parsers[type].isValid(xml)) { return true; }
 	}
 	return false;
@@ -50,10 +51,6 @@ Feeds.Parser.getFeedType = function(xml)
 Feeds.Parser.parsers = {};
 Feeds.Parser.addParser = function(type, parser)
 {
-	if (!(parser instanceof Feeds.Parser))
-	{
-		return false;
-	}
 	this.parsers[type] = parser;
 	return true;
 };
