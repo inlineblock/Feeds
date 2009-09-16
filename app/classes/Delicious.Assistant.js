@@ -6,7 +6,7 @@ Delicious.Assistant = Class.create({
 		this.addToNightShade('<div class="loader"></div>');
 	},
 	
-	removeLoader: function()
+	hideLoader: function()
 	{
 		this.hideNightShade();
 	},
@@ -18,7 +18,7 @@ Delicious.Assistant = Class.create({
 		this.addToNightShade('<div class="loading"></div>');
 	},
 	
-	removeLoading: function()
+	hideLoading: function()
 	{
 		this.hideNightShade();
 	},
@@ -133,6 +133,50 @@ Delicious.Assistant = Class.create({
 			         {label:neg , value:false , type:'dismiss'}
 			    ]
 			   });
+	},
+	
+	activateScrollTop: function()
+	{
+		var main = this.controller.get('main-header');
+		if (main)
+		{
+			this._scrollToTop = this._scrollToTop || this.scrollToTop.bindAsEventListener(this);
+			main.observe(Mojo.Event.tap , this._scrollToTop);
+		}
+	},
+	
+	deactivateScrollTop: function()
+	{
+		var main = this.controller.get('main-header');
+		if (main)
+		{
+			main.stopObserving(Mojo.Event.tap , this._scrollToTop);
+		}
+	},
+	
+	scrollToTop: function()
+	{
+		var scroller = this.controller.getSceneScroller();
+		var distance;
+		//scroller.scrollTop = (0);
+		var func = (function(el , distance) { 
+			var cur = el.scrollTop;
+			cur -= distance;
+			if (cur < 5)
+			{
+				el.scrollTop = 0;
+				return;
+			}
+			else
+			{
+				el.scrollTop = cur;
+				window.setTimeout(arguments.callee.bind({}, el , distance) , 50);
+			}
+		});
+		
+		distance = Math.ceil(scroller.scrollTop/10);
+		if (distance < 30) distance = 30;
+		func(scroller , distance);
 	},
 	
 	

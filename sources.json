@@ -10,9 +10,14 @@
     {"source": "app\/classes\/Delicious.StageManager.js"},
     {"source": "app\/classes\/Feeds.FeedManager.js"},
     {"source": "app\/classes\/Feeds.Feed.js"},
+    {"source": "app\/classes\/Feeds.GoogleAuth.js"},
+    {"source": "app\/classes\/Feeds.GoogleManager.js"},
+    {"source": "app\/classes\/Feeds.GoogleFeed.js"},
+    {"source": "app\/classes\/Feeds.GoogleArticle.js"},
     {"source": "app\/classes\/Feeds.Parser.js"},
     {"source": "app\/classes\/Feeds.RSSParser.js"},
     {"source": "app\/classes\/Feeds.AtomParser.js"},
+    {"source": "app\/classes\/Feeds.Preferences.js"},
     {
         "scenes": "support",
         "source": "app\/assistants\/support-assistant.js"
@@ -24,5 +29,17 @@
     {
         "scenes": "add-feed",
         "source": "app\/assistants\/add-feed-assistant.js"
+    },
+    {
+        "scenes": "view-feed",
+        "source": "app\/assistants\/view-feed-assistant.js"
+    },
+    {
+        "scenes": "view-article",
+        "source": "app\/assistants\/view-article-assistant.js"
+    },
+    {
+        "scenes": "login",
+        "source": "app\/assistants\/login-assistant.js"
     }
 ]

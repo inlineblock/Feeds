@@ -4,9 +4,17 @@
 	top:5px;
 	width:32px; 
 	height:32px;
-	background: url(../images/icon_32x32.png) no-repeat center ;
+	background: url(../images/icon_32x32.png) no-repeat center center;
 	padding: 10px 0px 0px 5px;
-	float:left;	
+}
+.smallLoader
+{
+	position:fixed;
+	left:15px;
+	top:10px;
+	width:32px; 
+	height:32px;
+	background: url(../images/small_loader.gif) no-repeat center center;
 }
 .list_scene {
 	position:relative;
@@ -92,29 +100,40 @@
 	position:relative;
 	height:50px;
 }
-
-.feedItem .icon
-{
-	position:absolute;
-	top:5px;
-	left:5px;
-	width:40px;
-	height:40px;
-	overflow: hidden;
-	background-image: inherit;
-	background-position: center center;
-	background-repeat: none;
-}
 .feedItem .title
 {
+	position: absolute;
+	top:0px;
+	left:10px;
 	line-height: 50px;
-	margin-left:50px;
 	white-space: nowrap;
 	padding:0px;
 	height:50px;
 }
+.feedItem .unreadCount
+{
+	position: absolute;
+	height:30px;
+	width:30px;
+	color:#FFF;
+	background: transparent url('../images/unreadcount.png') center center no-repeat;
+	top:10px;
+	right:10px;
+	text-align: center;
+	font-size: 16px;
+}
+.feedItem .unreadCount span
+{
+	margin:0 auto;
+	width:100%;
+	text-align: center;
+	line-height: 29px;
+}
 
-
+div.articleItem.unread
+{
+	font-weight: bold;
+}
 
 
 #overNightShade
@@ -143,4 +162,49 @@
 	width:128px;
 	height:15px;
 	background: transparent url('../images/loading.gif') center center no-repeat;
+}
+
+div#main-header.article 
+{
+	height: auto;
+	min-height: 52px;
+}
+div#main-header.article div#appIcon
+{
+	top:50%;
+	margin-top: -18px;
+}
+div#main-header div#articleTitle
+{
+	vertical-align:middle;
+	font-size:0.8em;
+	white-space: normal;
+	overflow-y: hidden;
+	position: static;
+}
+div#article
+{
+	margin:10px 5px 25px 5px;
+}
+div#article img
+{
+	max-width: 100%;
+}
+
+div#feedList .articleItem.unread div.title
+{
+	font-weight:bold;
+}
+
+#loadMore
+{
+	height:28px;
+	background: transparent url('../images/loadmore.png') bottom center no-repeat;
+	margin-bottom:16px;
+	width:100%;
+}
+#loadMore.loading
+{
+	background: transparent url('../images/load_more.gif') center center no-repeat;
+	height:32px;
 }

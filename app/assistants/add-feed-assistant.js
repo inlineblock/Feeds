@@ -18,7 +18,7 @@ AddFeedAssistant = Class.create(Delicious.Assistant , {
 		this.urlModel = {value: '' , disabled: false};
 		this.controller.setupWidget("urlField", { hintText: $L('http://') , multiline: false, enterSubmits: false}, this.urlModel);
 		
-		this.controller.setupWidget('addButton' , {label: $L("Add Feed") } , { buttonClass: "primary" , buttonLabel: $L("Add Feed") });
+		this.controller.setupWidget('addButton' , {label: $L("Add Feed (DISABLED)") , disabled:true } , { buttonClass: "primary" , buttonLabel: $L("Add Feed (DISABLED)") , disabled:true });
 		this.controller.setupWidget('cancelButton' , {label: $L("cancel")} , { buttonClass: "secondary" , buttonLabel: $L("cancel")});
 	},
 	

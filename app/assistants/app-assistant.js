@@ -9,6 +9,7 @@ AppAssistant = Class.create({
 	setup: function()
 	{
 		Feeds.StageManager = new Delicious.StageManager(this.controller);
+		Feeds.GoogleAccount = new Feeds.GoogleAuth();
 		this.fireTracking();
 		this.checkForUpdate();
 	},
@@ -16,7 +17,14 @@ AppAssistant = Class.create({
 	handleLaunch: function(o)
 	{
 		var o = o || {};
-		Feeds.StageManager.newCard('main' , 'main' , {initialLaunch: true});
+		if (Feeds.GoogleAccount.isLoggedIn())
+		{
+			Feeds.StageManager.newCard('main' , 'main' , {initialLaunch: true});
+		}
+		else
+		{
+			Feeds.StageManager.newCard('main' , 'login' , {initialLaunch: true});
+		}
 	},
 	
 	fireTracking: function()
