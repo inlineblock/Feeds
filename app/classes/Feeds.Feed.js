@@ -64,15 +64,12 @@ Feeds.Feed = Class.create({
 		this.callBacks['validateFeed'] = cB || function(){};
 		if (!this.feedURL)
 		{
-			console.log('invalidFeed');
-			console.dir(this.feedURL);
 			this.callBacks['validateFeed'](false , this);
 			delete this.callBacks['validateFeed'];
 			return;
 		}
 		
 		var ajax = new Ajax.Request(this.feedURL , {onSuccess: this._validateFeedSuccess , onFailure: this._validateFeedFailure});
-		console.dir(ajax);
 	},
 	
 	validateFeedSuccess: function(t)

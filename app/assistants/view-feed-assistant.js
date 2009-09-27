@@ -7,8 +7,8 @@ ViewFeedAssistant = Class.create(Delicious.Assistant , {
 		this.feed = o.feed || false;
 		
 		this.model = {listTitle: 'Articles' , items: []};
-		this.attributes = { itemTemplate: "view-feed/articleItem" , listTemplate: "view-feed/articleList" ,
-             				swipeToDelete: true , reorderable: true , renderLimit: 500 };
+		this.attributes = { itemTemplate: this.getArticleItemTemplate() , listTemplate: "view-feed/articleList" ,
+             				swipeToDelete: false , reorderable: false , renderLimit: 500 };
              				
         this.createListeners();
 	},
@@ -29,6 +29,7 @@ ViewFeedAssistant = Class.create(Delicious.Assistant , {
 		this.controller.setupWidget('articlesList' , this.attributes , this.model);
 		this.feed.getArticles(this.getArticlesCallBack.bind(this));
 		
+		this.controller.setupWidget(Mojo.Menu.appMenu , {} , {items:[{label: $L('Mark All As Read') , command: "markAllAsRead"}]});
 	},
 	
 	activate: function(o)
@@ -84,10 +85,30 @@ ViewFeedAssistant = Class.create(Delicious.Assistant , {
 		this.controller.stageController.pushScene('view-article' , {'article': article});
 	},
 	
+	getArticleItemTemplate: function()
+	{
+		if (this.feed.type == "feed")
+		{
+			return "view-feed/articleItem";
+		}
+		else
+		{
+			return "view-feed/articleFeedItem";
+		}
+	},
+	
 	getArticlesCallBack: function(retreived)
 	{
+		
 		this.hideLoader();
-		this.articlesChanged();
+		if (retreived)
+		{
+			this.articlesChanged();
+		}
+		else
+		{
+			this.errorDialog($L("Unable to load articles for this feed."));
+		}
 	},
 	
 	modelChanged: function()
@@ -170,6 +191,51 @@ ViewFeedAssistant = Class.create(Delicious.Assistant , {
 		{
 			appIcon.show();
 		}
+	},
+	
+	markAllAsRead: function()
+	{
+		this.feed.markAllAsRead(this.markAllAsReadCallBack.bind(this));
+		if (this._isRefreshing) return;
+		
+		this.showSmallLoader();
+		this._isRefreshing = true
+	},
+	
+	markAllAsReadCallBack: function(finished)
+	{
+		this._isRefreshing = false;
+		this.hideSmallLoader();
+		if (finished)
+		{
+			this.articlesChanged();
+		}
+		else
+		{
+			this.errorDialog('Unable to mark all as read.');
+		}
+	},
+	
+	handleCommand: function(event)
+	{
+		
+		if (this.feed && this.feed.type == 'psuedoFeed' && event.type == Mojo.Event.back)
+		{
+				event.preventDefault();
+				return this.controller.stageController.popScene({refreshCounts:true});
+		}
+		
+		if (event.type == Mojo.Event.command) 
+		{
+			switch (event.command) 
+			{
+				case "markAllAsRead":
+					return window.setTimeout(this.markAllAsRead.bind(this) , 50); // this prevents the stutter of the appmenu when going up.
+				break;
+			}
+		}
+		
+		this.doHandleCommand(event);
 	}
 
 });

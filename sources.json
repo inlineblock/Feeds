@@ -12,12 +12,15 @@
     {"source": "app\/classes\/Feeds.Feed.js"},
     {"source": "app\/classes\/Feeds.GoogleAuth.js"},
     {"source": "app\/classes\/Feeds.GoogleManager.js"},
+    {"source": "app\/classes\/Feeds.GoogleFolder.js"},
     {"source": "app\/classes\/Feeds.GoogleFeed.js"},
+    {"source": "app\/classes\/Feeds.GooglePsuedoFeed.js"},
     {"source": "app\/classes\/Feeds.GoogleArticle.js"},
     {"source": "app\/classes\/Feeds.Parser.js"},
     {"source": "app\/classes\/Feeds.RSSParser.js"},
     {"source": "app\/classes\/Feeds.AtomParser.js"},
     {"source": "app\/classes\/Feeds.Preferences.js"},
+    {"source": "app\/classes\/Feeds.Message.js"},
     {
         "scenes": "support",
         "source": "app\/assistants\/support-assistant.js"
@@ -41,5 +44,13 @@
     {
         "scenes": "login",
         "source": "app\/assistants\/login-assistant.js"
+    },
+    {
+        "scenes": "view-folder",
+        "source": "app\/assistants\/view-folder-assistant.js"
+    },
+    {
+        "scenes": "display-pic",
+        "source": "app\/assistants\/display-pic-assistant.js"
     }
 ]

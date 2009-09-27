@@ -31,7 +31,6 @@ Feeds.Parser.isValid = function(xml)
 	var parsers = this.parsers;
 	for (var type in parsers)
 	{
-		console.log('trying type: ' + type);
 		if (parsers[type].isValid(xml)) { return true; }
 	}
 	return false;

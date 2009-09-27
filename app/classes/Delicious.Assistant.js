@@ -92,21 +92,21 @@ Delicious.Assistant = Class.create({
 	
 	popScene: function(o)
 	{
-		var o = o || {};
+		o = o || {};
 		this.controller.stageController.popScene(o);
 	},
 	
 	errorDialog: function(msg , cb)
 	{
-		var cb = cb || function() {};
+		cb = cb || function() {};
 		this.msgDialog("Error" , msg , cb);
 	},
 	
 	msgDialog: function(titleText , msg , cb)
 	{
-		var titleText = titleText || "Title";
-		var msg = msg || "message alert text";
-		var cb = cb || function() {};
+		titleText = titleText || "Title";
+		msg = msg || "message alert text";
+		cb = cb || function() {};
 		this.controller.showAlertDialog({
 			    onChoose: cb ,
 			    title: titleText,
@@ -119,11 +119,11 @@ Delicious.Assistant = Class.create({
 	
 	posNegDialog: function(titleText , msg , pos , neg , cb)
 	{
-		var titleText = titleText || "Title";
-		var msg = msg || "message alert text";
-		var pos = pos || "Continue";
-		var neg = neg || "cancel";
-		var cb = cb || function() {};
+		titleText = titleText || "Title";
+		msg = msg || "message alert text";
+		pos = pos || "Continue";
+		neg = neg || "cancel";
+		cb = cb || function() {};
 		this.controller.showAlertDialog({
 			    onChoose: cb ,
 			    title: titleText,
@@ -179,5 +179,64 @@ Delicious.Assistant = Class.create({
 		func(scroller , distance);
 	},
 	
+	handleCommand: function(event)
+	{
+		this.doHandleCommand(event);
+	},
+	
+	doHandleCommand: function(event)
+	{
+		if (event.type == Mojo.Event.commandEnable && (event.command == Mojo.Menu.helpCmd)) 
+		{
+         	event.stopPropagation(); // enable help. now we have to handle it
+		}
+		
+		if (event.type == Mojo.Event.command) 
+		{
+			switch (event.command) 
+			{
+				case Mojo.Menu.helpCmd:
+					this.controller.stageController.pushScene('support');
+				break;
+								
+				
+				case "logout":
+					if (Feeds.GoogleAccount)
+					{
+						Feeds.GoogleAccount.logout();
+						Feeds.StageManager.close('main');
+					}
+				break;
+				
+				case "login":
+					this.controller.stageController.pushScene('login');
+				break;
+				
+			}
+		}
+	},
+	
+	getAppMenu: function()
+	{
+		if (Feeds.GoogleAccount.isLoggedIn())
+		{
+			return [{label: $L("Logout") , command: "logout"}];
+		}
+		else
+		{
+			return [{label: $L("Login") , command: "login"}];
+		}
+	},
+	
+	orientationChanged: function(orientation)
+	{
+		if (this._orientation === orientation)
+		{
+			return;
+		}
+		
+		this._orientation = orientation;
+		this.controller.window.PalmSystem.setWindowOrientation(this._orientation);
+	}
 	
 });

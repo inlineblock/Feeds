@@ -49,12 +49,30 @@ LoginAssistant = Class.create(Delicious.Assistant , {
 		if (worked)
 		{
 			Feeds.GoogleAccount.saveLogin(this.usernameModel.value , this.passwordModel.value);
-			this.controller.stageController.swapScene('main');
+			this.controller.stageController.popScenesTo('main' , {'fullRefresh':true});
 		}
 		else
 		{
 			this.errorDialog('Google Authentication Failed!');
 		}
-	}
+	},
+	
+	handleCommand: function(event)
+	{
+		if (event.type == Mojo.Event.commandEnable && (event.command == Mojo.Menu.helpCmd)) 
+		{
+         	event.stopPropagation(); // enable help. now we have to handle it
+		}
+		
+		if (event.type == Mojo.Event.command) 
+		{
+			switch (event.command) 
+			{
+				case Mojo.Menu.helpCmd:
+					this.controller.stageController.pushScene('support');
+				break;
+			}
+		}
+	},
 
 });

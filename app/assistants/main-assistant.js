@@ -4,7 +4,7 @@ MainAssistant = Class.create(Delicious.Assistant , {
 	{
 		this.model = {listTitle: 'Feeds' , items: []};
 		this.attributes = { itemTemplate: "main/feedItem" , listTemplate: "main/list" ,
-             				swipeToDelete: true , reorderable: true , renderLimit: 500 };
+             				swipeToDelete: false , reorderable: false , renderLimit: 500 };
         this.createListeners();
 	},
 	
@@ -24,17 +24,21 @@ MainAssistant = Class.create(Delicious.Assistant , {
 		}
 		this.controller.setupWidget('feedsList' , this.attributes , this.model);
 		this.showLoader();
-		//Feeds.Manager.initTable(this.getFeeds.bind(this));
 		
-		this.manager = Feeds.GoogleAccount.getManager();
-		if (this.manager.SID)
+		
+		var appMenu = this.getAppMenu();
+		appMenu.push({label: $L('Mark All As Read') , command: "markAllAsRead"});
+		this.controller.setupWidget(Mojo.Menu.appMenu , {} , {visible: true , items: appMenu});
+		
+		if (Feeds.GoogleAccount.isLoggedIn())
 		{
-			this.manager.getAllFeedsList(this.getAllFeeds.bind(this));
+			this.manager = Feeds.GoogleAccount.getManager();
+			var loginInfo = Feeds.GoogleAccount.getLogin();
+			this.manager.login(loginInfo.email , loginInfo.password , this.getAllFeeds.bind(this));
 		}
 		else
 		{
-			var loginInfo = Feeds.GoogleAccount.getLogin();
-			this.manager.login(loginInfo.email , loginInfo.password , this.getAllFeeds.bind(this));
+			this.hideLoader();
 		}
 	},
 	
@@ -54,6 +58,16 @@ MainAssistant = Class.create(Delicious.Assistant , {
 		if (o.refresh)
 		{
 			this.refreshList();
+		}
+		
+		if (o.refreshCounts)
+		{
+			this.refreshCounts();
+		}
+		
+		if (o.fullRefresh)
+		{
+			this.fullRefreshList();
 		}
 		
 		var feedsList = this.controller.get('feedsList');
@@ -84,13 +98,39 @@ MainAssistant = Class.create(Delicious.Assistant , {
 	
 	cleanup: function()
 	{
+		
+	},
 	
+	handleCommand: function(event)
+	{
+		if (event.type == Mojo.Event.command) 
+		{
+			switch (event.command) 
+			{
+				case "markAllAsRead":
+					return window.setTimeout(this.markAllAsRead.bind(this) , 50); // this prevents the stutter of the appmenu when going up.
+				break;
+			}
+		}
+		this.doHandleCommand(event);
 	},
 	
 	listTapHandler: function(event)
 	{
-		var feed = event.item;
-		this.controller.stageController.pushScene('view-feed' , {'feed': feed});
+		var item = event.item;
+		if (item.isFolder)
+		{
+			this.controller.stageController.pushScene('view-folder' , {'folder': item});
+		}
+		else
+		{
+			this.controller.stageController.pushScene('view-feed' , {'feed': item});
+		}
+	},
+	
+	fullRefreshList: function()
+	{
+		this.controller.stageController.swapScene({name: 'main' , transition: Mojo.Transition.crossFade});
 	},
 	
 	refreshList: function()
@@ -102,16 +142,33 @@ MainAssistant = Class.create(Delicious.Assistant , {
 	{
 		if (this._isRefreshing) return;
 		
-		this.showSmallLoader();
-		this._isRefreshing = true;
-		this.manager.updateUnreadCount(this.refreshCountsCallBack.bind(this));
+		if (Feeds.GoogleAccount.isLoggedIn() && this.manager.display.length === 0)
+		{
+			this.showLoader();
+			this.manager = Feeds.GoogleAccount.getManager();
+			var loginInfo = Feeds.GoogleAccount.getLogin();
+			this.manager.login(loginInfo.email , loginInfo.password , this.getAllFeeds.bind(this));
+		}
+		else
+		{
+			this.showSmallLoader();
+			this._isRefreshing = true;
+			this.manager.updateUnreadCount(this.refreshCountsCallBack.bind(this));
+		}
 	},
 	
-	refreshCountsCallBack: function()
+	refreshCountsCallBack: function(worked)
 	{
 		this._isRefreshing = false;
 		this.hideSmallLoader();
-		this.countChanged();
+		if (worked)
+		{
+			this.countChanged();
+		}
+		else
+		{
+			this.errorDialog(Feeds.Message.Error.getUnreadCounts);
+		}
 	},
 	
 	modelChanged: function()
@@ -121,7 +178,7 @@ MainAssistant = Class.create(Delicious.Assistant , {
 	
 	countChanged: function()
 	{
-		this.model.items = this.manager.feeds;
+		this.model.items = this.manager.getDisplayItems();
 		this.modelChanged();
 	},
 	
@@ -132,7 +189,6 @@ MainAssistant = Class.create(Delicious.Assistant , {
 	
 	getFeedsCallBack: function(response)
 	{
-		Mojo.Log.info('getFeedsCallBack' , Object.toJSON(response));
 		this.hideLoader();
 		if (response.success)
 		{
@@ -156,15 +212,39 @@ MainAssistant = Class.create(Delicious.Assistant , {
 	{
 		if (success)
 		{
-			this.model.items = this.manager.feeds;
+			this.model.items = this.manager.getDisplayItems();
 			this.modelChanged();
 			this.manager.updateUnreadCount(this.countChanged.bind(this));
 		}
 		else
 		{
-			this.errorDialog("Unable to load feeds from google.");
+			this.errorDialog("Unable to load feeds from Google Reader.");
 		}
 		this.hideLoader();
+	},
+	
+	markAllAsRead: function()
+	{
+		this.manager.markAllAsRead(this.markAllAsReadCallBack.bind(this));
+		if (this._isRefreshing) return;
+		
+		this.showSmallLoader();
+		this._isRefreshing = true
+	},
+	
+	markAllAsReadCallBack: function(finished)
+	{
+		this._isRefreshing = false;
+		
+		if (finished)
+		{
+			window.setTimeout(this.refreshCounts.bind(this) , 350);
+		}
+		else
+		{
+			this.hideSmallLoader();
+			this.errorDialog('Unable to mark all as read.');
+		}
 	},
 	
 	showSmallLoader: function()

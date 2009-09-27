@@ -37,15 +37,37 @@ Feeds.GoogleArticle = Class.create({
 			this.published = o.published;
 			this.author = o.author;
 			this.categories = o.categories;
-			this.text = o.summary.content || "No content.";
-			this.direction = o.summary.direction || false;
+			this.alternate = o.alternate;
+			
+			if (o.origin)
+			{
+				this.origin = o.origin;
+			}
+			
+			if (o.summary && o.summary.content)
+			{
+				this.text = o.summary.content;
+				if (o.summary.direction)
+				this.direction = o.summary.direction || false;
+			}
+			
+			if (o.content && o.content.content)
+			{
+				this.text = o.content.content;
+				if (o.content.direction)
+				{
+					this.direction = o.content.direction || false;
+				}
+			}
+			
+			
 			this.prepareText();
 			this.setupClasses();
 			
 		}
 		catch(e)
 		{
-			Mojo.Log.error(Object.toJSON(e));
+			Mojo.Log.error('+++++++Feeds.GoogleArticle LOAD:: ' ,Object.toJSON(e));
 		}
 	},
 	
@@ -62,7 +84,7 @@ Feeds.GoogleArticle = Class.create({
 		{
 			this.className += " unread";
 		}
-		this.className.trim();
+		this.className = this.className.trim();
 	},
 	
 	removeUnreadClassName: function()
@@ -119,6 +141,35 @@ Feeds.GoogleArticle = Class.create({
 		var forget = parts.pop();
 		parts.push('read');
 		return parts.join('/');
+	},
+	
+	getPreviousArticle: function()
+	{
+		if (!this.feed || !this.feed.articles.length) return false;
+		var index = this.feed.articles.indexOf(this);
+		if (index < 1) return false;
+		return this.feed.articles[index-1];
+	},
+	
+	getNextArticle: function()
+	{
+		if (!this.feed || !this.feed.articles.length) return false;
+		var index = this.feed.articles.indexOf(this);
+		if (index+1 >= this.feed.articles.length) return false;
+		return this.feed.articles[index+1];
+	},
+	
+	getArticleLink: function()
+	{
+		if (this.alternate && this.alternate.length > 0)
+		{
+			var alt = this.alternate[0];
+			if (alt.href)
+			{
+				return alt.href;
+			}
+		}
+		return false;
 	}
 	
 });

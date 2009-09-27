@@ -7,6 +7,24 @@
 	background: url(../images/icon_32x32.png) no-repeat center center;
 	padding: 10px 0px 0px 5px;
 }
+.refresh_icon {
+	position:absolute;
+	left:10px;
+	top:5px;
+	width:32px; 
+	height:32px;
+	background: url(../images/refresh.png) no-repeat center center;
+	padding: 10px 0px 0px 5px;
+}
+.folder_icon {
+	position:absolute;
+	left:10px;
+	top:5px;
+	width:32px; 
+	height:32px;
+	background: url(../images/folder.png) no-repeat center center;
+	padding: 10px 0px 0px 5px;
+}
 .smallLoader
 {
 	position:fixed;
@@ -15,6 +33,7 @@
 	width:32px; 
 	height:32px;
 	background: url(../images/small_loader.gif) no-repeat center center;
+	z-index: 1100;
 }
 .list_scene {
 	position:relative;
@@ -57,6 +76,15 @@
 	padding: 0px 0px 0px 5px;
 	float:left;
 }
+.fullscreen
+{
+	display: block;
+	position: fixed;
+	top:0px;
+	left:0px;
+	right:0px;
+	bottom:0px;
+}
 .palm-page-header.fixed
 {
 	position:fixed;
@@ -64,6 +92,8 @@
 	top:0px;
 	left:0px;
 	height:52px;
+	opacity:1;
+	z-index: 1000;
 }
 .palm-page-header.fixed .title
 {
@@ -85,42 +115,78 @@
 	top:5px;
 	width:32px; 
 	height:32px;
-	background: url(../images/add_icon.png) no-repeat center ;
+	background: url(../images/add_icon.png) no-repeat center;
 	padding: 10px 5px 0px 0px;
 	float:left;	
 }
 #addIcon:active
 {
-	opacity:0.2;
+	opacity:0.3;
 }
-
 
 .feedItem
 {
 	position:relative;
 	height:50px;
 }
-.feedItem .title
+
+.feedItem.folder .icon
 {
 	position: absolute;
+	top:10px;
+	left:5px;
+	width:32px;
+	height: 32px;
+	background: transparent url('../images/folder.png') center center no-repeat;
+}
+.feedItem.feed .icon
+{
+	position: absolute;
+	top:8px;
+	left:6px;
+	width:32px;
+	height: 32px;
+	background: transparent url('../images/feed.png') center center no-repeat;
+}
+.feedItem.psuedo .icon
+{
+	position: absolute;
+	top:8px;
+	left:6px;
+	width:32px;
+	height: 32px;
+	background: transparent url('../images/all-items.png') center center no-repeat;
+}
+
+.feedItem .title
+{
+	position: relative;
 	top:0px;
-	left:10px;
 	line-height: 50px;
-	white-space: nowrap;
-	padding:0px;
+	
+	padding:0 55px 0 45px;
 	height:50px;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
 }
 .feedItem .unreadCount
 {
 	position: absolute;
 	height:30px;
-	width:30px;
-	color:#FFF;
-	background: transparent url('../images/unreadcount.png') center center no-repeat;
-	top:10px;
+	min-width:26px;
+	padding:0 2px;
+	color:#5E7C90;
+	*background: transparent url('../images/unreadcount.png') center center no-repeat;
+	*background: #37596F;
+	top:8px;
 	right:10px;
 	text-align: center;
-	font-size: 16px;
+	font-size: 15px;
+	text-shadow: 1px 1px 1px #BBBBBB;
+	border: 2px solid #B0B0B0;
+	border-radius: 10px;
+	-webkit-border-radius: 10px;
 }
 .feedItem .unreadCount span
 {
@@ -128,11 +194,6 @@
 	width:100%;
 	text-align: center;
 	line-height: 29px;
-}
-
-div.articleItem.unread
-{
-	font-weight: bold;
 }
 
 
@@ -164,6 +225,22 @@ div.articleItem.unread
 	background: transparent url('../images/loading.gif') center center no-repeat;
 }
 
+div.sectionHead
+{
+	font-size:14px;
+	font-weight:bold;
+	text-transform: uppercase;
+	vertical-align: middle;
+	color:#FFF;
+	text-shadow: rgb(100, 100, 84) 0px 1px 0px;
+	height:28px;
+	margin:12px 8px 4px 8px;
+	line-height: 28px;
+	padding: 0;
+	-webkit-border-image: url(../images/section_header.png) 0 19 0 19 stretch stretch;
+	border-width: 2px 16px 2px 16px;
+}
+
 div#main-header.article 
 {
 	height: auto;
@@ -181,19 +258,52 @@ div#main-header div#articleTitle
 	white-space: normal;
 	overflow-y: hidden;
 	position: static;
+	color:#111;
+}
+div#main-header div.feedTitle
+{
+	margin:-4px 10px 10px 56px;
+	font-size:0.8em;
+	font-weight:bold;
+	color:#777;
+	display: block;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	width:200px;
 }
 div#article
 {
 	margin:10px 5px 25px 5px;
+	font-size:0.8em;
 }
 div#article img
 {
 	max-width: 100%;
 }
-
+div#feedList .articleItem
+{
+	min-height: 40px;
+}
+div#feedList .articleItem div.title
+{
+	font-size:.9em;
+	padding:4px 6px;
+}
 div#feedList .articleItem.unread div.title
 {
 	font-weight:bold;
+}
+div#feedList .articleItem div.feedTitle
+{
+	font-weight:bold;
+	font-size:0.6em;
+	padding:0px 6px 4px 6px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	display:block;
+	width:98%;
+	color:#777;
 }
 
 #loadMore
@@ -201,6 +311,7 @@ div#feedList .articleItem.unread div.title
 	height:28px;
 	background: transparent url('../images/loadmore.png') bottom center no-repeat;
 	margin-bottom:16px;
+	margin-top:16px;
 	width:100%;
 }
 #loadMore.loading

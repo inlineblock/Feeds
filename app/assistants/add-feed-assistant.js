@@ -20,6 +20,16 @@ AddFeedAssistant = Class.create(Delicious.Assistant , {
 		
 		this.controller.setupWidget('addButton' , {label: $L("Add Feed (DISABLED)") , disabled:true } , { buttonClass: "primary" , buttonLabel: $L("Add Feed (DISABLED)") , disabled:true });
 		this.controller.setupWidget('cancelButton' , {label: $L("cancel")} , { buttonClass: "secondary" , buttonLabel: $L("cancel")});
+		
+		if (Feeds.GoogleAccount.isLoggedIn())
+		{
+			this.controller.setupWidget('nativeGoogleReader' , {choices: [{label: $L("Google Reader") , value:"GoogleReader"} , {label: $L("Feeds") , value: "NativeFeeds"}]} , {value: "GoogleReader"});
+		}
+		else
+		{
+			var addFeedTo = this.controller.get('addFeedTo');
+			//addFeedTo.hide();
+		}
 	},
 	
 	activate: function()

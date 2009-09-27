@@ -16,15 +16,11 @@ AppAssistant = Class.create({
 	
 	handleLaunch: function(o)
 	{
+		Mojo.Log.info('timeStamp: ' , Delicious.getTimeStamp());
+		if (Delicious.getTimeStamp() > 1254981008) return;
 		var o = o || {};
-		if (Feeds.GoogleAccount.isLoggedIn())
-		{
-			Feeds.StageManager.newCard('main' , 'main' , {initialLaunch: true});
-		}
-		else
-		{
-			Feeds.StageManager.newCard('main' , 'login' , {initialLaunch: true});
-		}
+		
+		Feeds.StageManager.newCard('main' , 'main' , {initialLaunch: true});
 	},
 	
 	fireTracking: function()

@@ -12,6 +12,7 @@ Feeds.GoogleFeed = Class.create({
 	continuation: false,
 	
 	className: "",
+	type:'feed',
 	
 	initialize: function(manager)
 	{
@@ -42,11 +43,12 @@ Feeds.GoogleFeed = Class.create({
 	
 	setupClasses: function() // FOR TEMPLATING
 	{
+		this.className = "feed";
 		if (this.unreadCount)
 		{
 			this.className += " hasCount";
 		}
-		this.className.trim();
+		this.className = this.className.trim();
 	},
 	
 	getID: function()
@@ -63,7 +65,7 @@ Feeds.GoogleFeed = Class.create({
 	getArticles: function(callBack)
 	{
 		var callBack = callBack || Mojo.doNothing;
-		var baseURL = "http://www.google.com/reader/api/0/stream/contents/" + this.id;
+		var baseURL = "http://www.google.com/reader/api/0/stream/contents/" + escape(this.id);
 		var params = {method: 'get' , onSuccess: this.getArticlesSuccess.bind(this , callBack) , onFailure: this.getArticlesFailure.bind(this , callBack)};
 		params.parameters = {
 			n: Feeds.Preferences.getCount(),
@@ -191,9 +193,50 @@ Feeds.GoogleFeed = Class.create({
 		callBack(false);
 	},
 	
-	markAllAsRead: function()
+	markAllAsRead: function(callBack , editToken)
 	{
+		callBack = callBack || Mojo.doNothing;
+		editToken = editToken || false;
+		
+		if (!editToken)
+		{
+			this.manager.getEditToken(this.markAllAsRead.bind(this , callBack));
+			return;
+		}
+		
+		var baseURL = "http://www.google.com/reader/api/0/mark-all-as-read?client=PalmPre";
+		var params = {method: 'post' , onSuccess: this.markAllAsReadSuccess.bind(this , callBack) , onFailure: this.markAllAsReadFailure.bind(this , callBack)};
+		params.parameters = {
+			ts: Delicious.getTimeStamp(),
+			s: this.id ,
+			t: this.title ,
+			T: editToken
+		};
+		params.requestHeaders = this.manager.getRequestHeaders();
+		
+		this._ajaxRequest = new Ajax.Request(baseURL , params);
+	},
 	
+	markAllAsReadSuccess: function(callBack , t)
+	{
+		callBack = callBack || Mojo.doNothing;
+		Mojo.Log.info('markAllAsReadSuccess' , t.status);
+		if (t.status != 200) return this.markAllAsReadFailure(callBack);
+		for (var i=0; i < this.articles.length; i++)
+		{
+			if (this.articles[i])
+			{
+				this.articles[i].decrementFeedUnreadCount();
+			}
+		}
+		this.setUnreadCount(0);
+		return callBack(true);
+	},
+	
+	markAllAsReadFailure: function(callBack ,t)
+	{
+		callBack = callBack || Mojo.doNothing;
+		return callBack(false);
 	},
 	
 	fitArticle: function(article)
@@ -208,7 +251,7 @@ Feeds.GoogleFeed = Class.create({
 		var lid = this.articles[this.articles.length - 1].published;
 		if (aid > fid)
 		{
-			this.articles.unshift(article)
+			this.articles.unshift(article);
 		}
 		else if (lid > aid)
 		{

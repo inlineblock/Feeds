@@ -105,12 +105,11 @@ Feeds.GoogleAuth = Class.create({
 	getManager: function()
 	{
 		var manager = new Feeds.GoogleManager();
-		var loginInfo = this.getLogin();
 		
 		if (this.SID)
 		{
-			manager.setLogin(loginInfo.email , loginInfo.password);
 			manager.setSID(this.SID);
+			manager.storeSID(this.SID);
 		}
 		
 		return manager;
