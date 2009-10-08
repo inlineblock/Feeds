@@ -1,19 +1,25 @@
 Feeds.GoogleFolder = Class.create({
+	manager: false,
+	
 	isFolder:true,
 	id: false,
 	title: false,
 	feeds: [],
+	display: [],
 	unreadCount: false,
 	
 	className: "folder",
 	type: 'folder',
 	
-	initialize: function(o)
+	initialize: function(manager , o)
 	{
+		this.manager = manager;
 		this.id = o.id;
 		this.setTitle(o.label);
 		this.feeds = [];
+		this.display = [];
 		this.unreadCount = 0;
+		this.setupAllItemsFeed();
 	},
 	
 	setTitle: function(title)
@@ -24,6 +30,7 @@ Feeds.GoogleFolder = Class.create({
 	addFeed: function(feed)
 	{
 		this.feeds.push(feed);
+		this.display.push(feed);
 		//this.refreshUnreadCount();
 	},
 	
@@ -39,6 +46,10 @@ Feeds.GoogleFolder = Class.create({
 					count += this.feeds[i].unreadCount;
 				}
 				this.unreadCount = count;
+			}
+			if (this.allItemsFeed)
+			{
+				this.allItemsFeed.setUnreadCount(this.unreadCount);
 			}
 			this.setupClasses();
 		}
@@ -57,4 +68,19 @@ Feeds.GoogleFolder = Class.create({
 		}
 		this.className = this.className.trim();
 	},
+	
+	setupAllItemsFeed: function()
+	{
+		if (this.display.length == 0)
+		{
+			this.allItemsFeed = new Feeds.GooglePsuedoFeed(this);
+			this.allItemsFeed.load({id: this.id , title: this.title});
+			this.display.push(this.allItemsFeed);
+		}
+	},
+	
+	getRequestHeaders: function()
+	{
+		return this.manager.getRequestHeaders();
+	}
 });

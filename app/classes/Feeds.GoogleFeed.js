@@ -21,6 +21,11 @@ Feeds.GoogleFeed = Class.create({
 		this.className = "";
 	},
 	
+	getRequestHeaders: function()
+	{
+		return this.manager.getRequestHeaders();
+	},
+	
 	load: function(o)
 	{
 		try
@@ -62,8 +67,9 @@ Feeds.GoogleFeed = Class.create({
 		this.setupClasses();
 	},
 	
-	getArticles: function(callBack)
+	getArticles: function(callBack , getType)
 	{
+		getType = getType || 'all';
 		var callBack = callBack || Mojo.doNothing;
 		var baseURL = "http://www.google.com/reader/api/0/stream/contents/" + escape(this.id);
 		var params = {method: 'get' , onSuccess: this.getArticlesSuccess.bind(this , callBack) , onFailure: this.getArticlesFailure.bind(this , callBack)};
@@ -71,7 +77,13 @@ Feeds.GoogleFeed = Class.create({
 			n: Feeds.Preferences.getCount(),
 			ck: Delicious.getTimeStamp(),
 		}
-		params.requestHeaders = this.manager.getRequestHeaders();
+		
+		if (getType == 'unread')
+		{
+			params.parameters.xt = 'user/-/state/com.google/read';
+		}
+		
+		params.requestHeaders = this.getRequestHeaders();
 		this.ajaxRequest = new Ajax.Request(baseURL , params);
 	},
 	
@@ -105,8 +117,9 @@ Feeds.GoogleFeed = Class.create({
 		callBack(false);
 	},
 	
-	refreshArticles: function(callBack)
+	refreshArticles: function(callBack , getType)
 	{
+		getType = getType || 'all';
 		var callBack = callBack || Mojo.doNothing;
 		var baseURL = "http://www.google.com/reader/api/0/stream/contents/" + this.id;
 		var params = {method: 'get' , onSuccess: this.refreshArticlesSuccess.bind(this , callBack) , onFailure: this.refreshArticlesFailure.bind(this , callBack)};
@@ -114,7 +127,14 @@ Feeds.GoogleFeed = Class.create({
 			n: Feeds.Preferences.getCount(),
 			ck: Delicious.getTimeStamp(),
 		}
-		params.requestHeaders = this.manager.getRequestHeaders();
+		
+		if (getType == 'unread')
+		{
+			params.parameters.xt = 'user/-/state/com.google/read';
+			this.removeAllReadArticles();
+		}
+		
+		params.requestHeaders = this.getRequestHeaders();
 		this.ajaxRequest = new Ajax.Request(baseURL , params);
 	},
 	
@@ -148,8 +168,9 @@ Feeds.GoogleFeed = Class.create({
 	},
 	
 	
-	loadMoreArticles: function(callBack)
+	loadMoreArticles: function(callBack , getType)
 	{
+		getType = getType || 'all';
 		var callBack = callBack || Mojo.doNothing;
 		var baseURL = "http://www.google.com/reader/api/0/stream/contents/" + this.id;
 		var params = {method: 'get' , onSuccess: this.loadMoreArticlesSuccess.bind(this , callBack) , onFailure: this.loadMoreArticlesFailure.bind(this , callBack)};
@@ -158,7 +179,13 @@ Feeds.GoogleFeed = Class.create({
 			ck: Delicious.getTimeStamp(),
 			c: this.continuation
 		}
-		params.requestHeaders = this.manager.getRequestHeaders();
+		
+		if (getType == 'unread')
+		{
+			params.parameters.xt = 'user/-/state/com.google/read';
+		}
+		
+		params.requestHeaders = this.getRequestHeaders();
 		this.ajaxRequest = new Ajax.Request(baseURL , params);
 	},
 	
@@ -212,7 +239,7 @@ Feeds.GoogleFeed = Class.create({
 			t: this.title ,
 			T: editToken
 		};
-		params.requestHeaders = this.manager.getRequestHeaders();
+		params.requestHeaders = this.getRequestHeaders();
 		
 		this._ajaxRequest = new Ajax.Request(baseURL , params);
 	},
@@ -258,5 +285,25 @@ Feeds.GoogleFeed = Class.create({
 			this.articles.push(article);
 		}
 	},
+	
+	resetArticles: function()
+	{
+		this.continuation = false;
+		this.articles = [];
+	},
+	
+	removeAllReadArticles: function()
+	{
+		var articles = [];
+		for(var i=0; i < this.articles.length; i++)
+		{
+			if (this.articles && this.articles[i] && !this.articles[i].hasBeenRead())
+			{
+				articles.push(this.articles[i]);
+			}
+		}
+		
+		this.articles = articles;
+	}
 	
 });

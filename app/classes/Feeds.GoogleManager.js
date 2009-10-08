@@ -125,6 +125,7 @@ Feeds.GoogleManager  = Class.create({
 		if (t.status != 200) return this.updateUnreadCountFailure(callBack);
 		try
 		{
+			this.blindMarkAllAsRead();
 			var counts = t.responseText.evalJSON().unreadcounts;
 			if (counts.length)
 			{
@@ -206,6 +207,7 @@ Feeds.GoogleManager  = Class.create({
 	
 	getEditToken: function(callBack)
 	{
+		Mojo.Log.info('getEditToken');
 		var callBack = callBack || Mojo.doNothing;
 		var token = this.getLastEditToken();
 		if (!token)
@@ -254,7 +256,7 @@ Feeds.GoogleManager  = Class.create({
 					}
 					else
 					{
-						this.folders[cat.id] = new Feeds.GoogleFolder(cat);
+						this.folders[cat.id] = new Feeds.GoogleFolder(this , cat);
 						this.folders[cat.id].addFeed(feed);
 						this.display.push(this.folders[cat.id]);
 					}
@@ -366,6 +368,116 @@ Feeds.GoogleManager  = Class.create({
 				this.feeds[i].setUnreadCount(0);
 			}
 		}
+	},
+	
+	addFeed: function(url , callBack , editToken)
+	{
+		callBack = callBack || Mojo.doNothing;
+		editToken = editToken || false;
+		
+		if (!editToken)
+		{
+			this.getEditToken(this.addFeed.bind(this , url , callBack));
+			return;
+		}
+		
+		var baseURL = "http://www.google.com/reader/api/0/subscription/quickadd?client=PalmPre";
+		var params = {method: 'post' , onSuccess: this.addFeedSuccess.bind(this , callBack) , onFailure: this.addFeedFailure.bind(this , callBack)};
+		params.parameters = {
+			quickadd: url ,
+			T: editToken
+		};
+		params.requestHeaders = this.getRequestHeaders();
+		
+		this._ajaxRequest = new Ajax.Request(baseURL , params);
+	},
+	
+	addFeedSuccess: function(callBack , t)
+	{
+		callBack = callBack || Mojo.doNothing;
+		if (t.status != 200) return this.addFeedFailure(callBack);
+		try
+		{
+			var d = t.responseText.evalJSON();
+			if (d.streamId)
+			{
+				return callBack(true , d);
+			}
+			else
+			{
+				this.addFeedFailure(callBack);// should display probable stuff
+			}
+		}
+		catch(e)
+		{
+			return this.addFeedFailure(callBack);
+		}
+		
+	},
+	
+	addFeedFailure: function(callBack , t)
+	{
+		callBack = callBack || Mojo.doNothing;
+		
+		callBack(false);
+	},
+	
+	deleteFeed: function(feed , callBack , editToken)
+	{
+		callBack = callBack || Mojo.doNothing;
+		editToken = editToken || false;
+		
+		if (!editToken)
+		{
+			this.getEditToken(this.deleteFeed.bind(this , feed , callBack));
+			return;
+		}
+		
+		var baseURL = "http://www.google.com/reader/api/0/subscription/edit?client=settings";
+		var params = {method: 'post' , onSuccess: this.deleteFeedSuccess.bind(this , feed , callBack) , onFailure: this.deleteFeedFailure.bind(this , feed , callBack)};
+		params.parameters = {
+			ac: 'unsubscribe',
+			s: feed.id,
+			t: feed.title,
+			T: editToken
+		};
+		params.requestHeaders = this.getRequestHeaders();
+		
+		this._ajaxRequest = new Ajax.Request(baseURL , params);
+	},
+	
+	deleteFeedSuccess: function(feed , callBack , t)
+	{
+		if (t.status != 200) return this.deleteFeedFailure(feed , callBack);
+		this.removeFeedFromAll(feed);
+		callBack(true);
+	},
+	
+	deleteFeedFailure: function(feed , callBack , t)
+	{
+		callBack = callBack || Mojo.doNothing;
+		callBack(false);
+	},
+	
+	removeFeedFromAll: function(feed)
+	{
+		try
+		{
+			this.feeds = this.feeds.without(feed);
+			this.display = this.display.without(feed);
+			for(var i in this.folders) if (this.folders.hasOwnProperty(i))
+			{
+				try
+				{
+					this.folders[i].feeds = this.folders[i].feeds.without(feed);
+				}
+				catch(e){}
+			}
+		}
+		catch(e){}
+		
+		
+		
 	}
 
 });

@@ -186,7 +186,7 @@ Delicious.Assistant = Class.create({
 	
 	doHandleCommand: function(event)
 	{
-		if (event.type == Mojo.Event.commandEnable && (event.command == Mojo.Menu.helpCmd)) 
+		if (event.type == Mojo.Event.commandEnable && (event.command == Mojo.Menu.helpCmd || event.command == Mojo.Menu.prefsCmd)) 
 		{
          	event.stopPropagation(); // enable help. now we have to handle it
 		}
@@ -198,7 +198,10 @@ Delicious.Assistant = Class.create({
 				case Mojo.Menu.helpCmd:
 					this.controller.stageController.pushScene('support');
 				break;
-								
+				
+				case Mojo.Menu.prefsCmd:
+					this.controller.stageController.pushScene('preferences');
+				break;			
 				
 				case "logout":
 					if (Feeds.GoogleAccount)

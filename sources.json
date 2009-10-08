@@ -1,56 +1,60 @@
 [
     {"source": "support_info.js"},
-    {"source": "app\/assistants\/app-assistant.js"},
-    {"source": "app\/assistants\/stage-assistant.js"},
-    {"source": "app\/classes\/Delicious.js"},
-    {"source": "app\/classes\/Feeds.js"},
-    {"source": "app\/classes\/Omniture.js"},
-    {"source": "app\/classes\/Delicious.Assistant.js"},
-    {"source": "app\/classes\/Delicious.Database.js"},
-    {"source": "app\/classes\/Delicious.StageManager.js"},
-    {"source": "app\/classes\/Feeds.FeedManager.js"},
-    {"source": "app\/classes\/Feeds.Feed.js"},
-    {"source": "app\/classes\/Feeds.GoogleAuth.js"},
-    {"source": "app\/classes\/Feeds.GoogleManager.js"},
-    {"source": "app\/classes\/Feeds.GoogleFolder.js"},
-    {"source": "app\/classes\/Feeds.GoogleFeed.js"},
-    {"source": "app\/classes\/Feeds.GooglePsuedoFeed.js"},
-    {"source": "app\/classes\/Feeds.GoogleArticle.js"},
-    {"source": "app\/classes\/Feeds.Parser.js"},
-    {"source": "app\/classes\/Feeds.RSSParser.js"},
-    {"source": "app\/classes\/Feeds.AtomParser.js"},
-    {"source": "app\/classes\/Feeds.Preferences.js"},
-    {"source": "app\/classes\/Feeds.Message.js"},
+    {"source": "app/assistants/app-assistant.js"},
+    {"source": "app/assistants/stage-assistant.js"},
+    {"source": "app/classes/Delicious.js"},
+    {"source": "app/classes/Feeds.js"},
+    {"source": "app/classes/Omniture.js"},
+    {"source": "app/classes/Delicious.Assistant.js"},
+    {"source": "app/classes/Delicious.Database.js"},
+    {"source": "app/classes/Delicious.StageManager.js"},
+    {"source": "app/classes/Feeds.FeedManager.js"},
+    {"source": "app/classes/Feeds.Feed.js"},
+    {"source": "app/classes/Feeds.GoogleAuth.js"},
+    {"source": "app/classes/Feeds.GoogleManager.js"},
+    {"source": "app/classes/Feeds.GoogleFolder.js"},
+    {"source": "app/classes/Feeds.GoogleFeed.js"},
+    {"source": "app/classes/Feeds.GooglePsuedoFeed.js"},
+    {"source": "app/classes/Feeds.GoogleArticle.js"},
+    {"source": "app/classes/Feeds.Parser.js"},
+    {"source": "app/classes/Feeds.RSSParser.js"},
+    {"source": "app/classes/Feeds.AtomParser.js"},
+    {"source": "app/classes/Feeds.Preferences.js"},
+    {"source": "app/classes/Feeds.Message.js"},
     {
         "scenes": "support",
-        "source": "app\/assistants\/support-assistant.js"
+        "source": "app/assistants/support-assistant.js"
     },
     {
         "scenes": "main",
-        "source": "app\/assistants\/main-assistant.js"
+        "source": "app/assistants/main-assistant.js"
     },
     {
         "scenes": "add-feed",
-        "source": "app\/assistants\/add-feed-assistant.js"
+        "source": "app/assistants/add-feed-assistant.js"
     },
     {
         "scenes": "view-feed",
-        "source": "app\/assistants\/view-feed-assistant.js"
+        "source": "app/assistants/view-feed-assistant.js"
     },
     {
         "scenes": "view-article",
-        "source": "app\/assistants\/view-article-assistant.js"
+        "source": "app/assistants/view-article-assistant.js"
     },
     {
         "scenes": "login",
-        "source": "app\/assistants\/login-assistant.js"
+        "source": "app/assistants/login-assistant.js"
     },
     {
         "scenes": "view-folder",
-        "source": "app\/assistants\/view-folder-assistant.js"
+        "source": "app/assistants/view-folder-assistant.js"
     },
     {
         "scenes": "display-pic",
-        "source": "app\/assistants\/display-pic-assistant.js"
+        "source": "app/assistants/display-pic-assistant.js"
+    },
+    {
+        "scenes": "preferences",
+        "source": "app/assistants/preferences-assistant.js"
     }
 ]

@@ -1,6 +1,8 @@
 AddFeedAssistant = Class.create(Delicious.Assistant , {
-	initialize: function()
+	initialize: function(o)
 	{
+		o = o || {};
+		this.manager = o.manager || false;
 		this.createListener();
 	},
 	
@@ -18,12 +20,13 @@ AddFeedAssistant = Class.create(Delicious.Assistant , {
 		this.urlModel = {value: '' , disabled: false};
 		this.controller.setupWidget("urlField", { hintText: $L('http://') , multiline: false, enterSubmits: false}, this.urlModel);
 		
-		this.controller.setupWidget('addButton' , {label: $L("Add Feed (DISABLED)") , disabled:true } , { buttonClass: "primary" , buttonLabel: $L("Add Feed (DISABLED)") , disabled:true });
+		this.controller.setupWidget('addButton' , {label: $L("Add Feed") } , { buttonClass: "primary" , buttonLabel: $L("Add Feed") , disabled:true});
 		this.controller.setupWidget('cancelButton' , {label: $L("cancel")} , { buttonClass: "secondary" , buttonLabel: $L("cancel")});
 		
 		if (Feeds.GoogleAccount.isLoggedIn())
 		{
-			this.controller.setupWidget('nativeGoogleReader' , {choices: [{label: $L("Google Reader") , value:"GoogleReader"} , {label: $L("Feeds") , value: "NativeFeeds"}]} , {value: "GoogleReader"});
+			this.switchModel = {value: "GoogleReader"};
+			this.controller.setupWidget('nativeGoogleReader' , {choices: [{label: $L("Google Reader") , value:"GoogleReader"} , {label: $L("Feeds") , value: "NativeFeeds"}]} , this.switchModel);
 		}
 		else
 		{
@@ -67,17 +70,22 @@ AddFeedAssistant = Class.create(Delicious.Assistant , {
 			return this.errorDialog($L("You must enter in the feed's url."));
 		}
 		
-		
-		var newFeed = new Feeds.Feed();
-		newFeed.setTitle(this.titleModel.value);
-		if (!newFeed.setFeedURL(this.urlModel.value))
+		if (this.switchModel.value == "GoogleReader")
 		{
-			return this.errorDialog($L("Invalid Feed URL."));
+			this.showLoading();
+			this.manager.addFeed(this.urlModel.value , this.addGoogleFeedCallBack.bind(this));
 		}
-		
-		
-		this.showLoading();
-		newFeed.validateFeed(this.validateFeed.bind(this));
+		else if (this.switchModel.value == "NativeFeeds")
+		{
+			var newFeed = new Feeds.Feed();
+			newFeed.setTitle(this.titleModel.value);
+			if (!newFeed.setFeedURL(this.urlModel.value))
+			{
+				return this.errorDialog($L("Invalid Feed URL."));
+			}
+			
+			newFeed.validateFeed(this.validateFeed.bind(this));
+		}
 	},
 	
 	validateFeed: function(valid , feed)
@@ -96,6 +104,20 @@ AddFeedAssistant = Class.create(Delicious.Assistant , {
 	addNewFeedCallBack: function()
 	{
 		this.popScene({refresh: true});
+	},
+	
+	
+	addGoogleFeedCallBack: function(worked)
+	{
+		this.hideLoading();
+		if (worked)
+		{
+			this.controller.stageController.popScene({fullRefresh:true});
+		}
+		else
+		{
+			this.errorDialog('Error adding the feed to Google Reader');
+		}
 	}
 	
 	

@@ -23,19 +23,20 @@ DisplayPicAssistant = Class.create(Delicious.Assistant , {
 	{
 		try
 		{
-		if (!this.imageURL) this.controller.stageController.popScene();
-		
-		this._orientation = this.controller.stageController.getAppController().getScreenOrientation();
-		this.controller.enableFullScreenMode(true);
-		
-		if (!this.imageURL)
-		{
-			this.controller.stageController.popScene();
-		}
-		
-		this.flipviewElement = this.controller.get('image_flipview_full');
-		this.fullscreener = this.controller.get('fullscreener');
-		this.controller.setupWidget('image_flipview_full' , {} , {});
+			if (!this.imageURL) return this.controller.stageController.popScene();
+			
+			this._orientation = this.controller.stageController.getAppController().getScreenOrientation();
+			
+			if (!this.imageURL)
+			{
+				this.controller.stageController.popScene();
+			}
+			
+			this.flipviewElement = this.controller.get('image_flipview_full');
+			this.fullscreener = this.controller.get('fullscreener');
+			this.controller.setupWidget('image_flipview_full' , {} , {});
+			
+			this.controller.setupWidget(Mojo.Menu.appMenu, {omitDefaultItems: true} , { visible: true, items: [{ label: $L('Save Photo'), command: 'savePhoto' }]});
 		
 		}
 		catch(e)
@@ -46,7 +47,7 @@ DisplayPicAssistant = Class.create(Delicious.Assistant , {
 	
 	cleanup: function()
 	{
-		this.controller.enableFullScreenMode(false);
+		
 	},
 	
 	resetSizing: function()
@@ -64,18 +65,19 @@ DisplayPicAssistant = Class.create(Delicious.Assistant , {
 			switch(event.command)
 			{
 				case 'savePhoto':
-					var downloadResponse = this.downloadResponse.bind(this);
-					var imgurl = this.imageURL.replace(' ' , '%20');
-					var downloadRequest = new Mojo.Service.Request('palm://com.palm.downloadmanager', {
-						method: 'download',
-						parameters:
-						{
-							'target': imgurl ,
-							'targetDir': '/media/internal/wallpapers',
-							'subscribe': false
-						},
-						onSuccess: downloadResponse ,
-						onFailure: downloadResponse
+					var onSuccess = this.onSuccessPhotoSave.bind(this);
+					var onFailure = this.onFailurePhotoSave.bind(this);
+					var imgurl = this.imageURL;
+					var mimeExt = this.imageURL.substring(this.imageURL.length - 3 , this.imageURL.length);
+					this._downloadRequest = new Mojo.Service.Request('palm://com.palm.downloadmanager', {
+							method: 'download',
+						parameters: {
+							'target': imgurl,
+							'targetDir': '/media/internal/downloads',
+							'mime': 'image/' + mimeExt
+							},
+						'onSuccess': onSuccess,
+						'onFailure': onFailure
 					});
 				    
 				break;
@@ -83,20 +85,15 @@ DisplayPicAssistant = Class.create(Delicious.Assistant , {
 		}
 	},
 	
-	downloadResponse: function(response)
+	onSuccessPhotoSave: function(e)
 	{
-		var banner;
-		if (response.completed)
-		{
-			banner = this.controller.showBanner({messageText: "Photo saved successfully." , icon: "feeds"} , {} , "feeds");
-			return;
-		}
-		
-		if (response.completionStatusCode)
-		{
-			banner = this.controller.showBanner({messageText: "status. " + response.completionStatusCode , icon: "feeds"} , {} , "feeds");
-			return;
-		}
+		Mojo.Log.info("PhotoSAVE----" , Object.toJSON(e));
+		var banner = this.controller.showBanner({messageText: "Photo saved successfully." , icon: "Feeds"} , {} , "Feeds");
+	},
+	
+	onFailurePhotoSave: function()
+	{
+		var banner = this.controller.showBanner({messageText: "Unable to save photo. " , icon: "Feeds"} , {} , "Feeds");
 	},
 	
 	activate: function(event)

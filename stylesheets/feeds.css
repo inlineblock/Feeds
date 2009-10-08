@@ -98,7 +98,9 @@
 .palm-page-header.fixed .title
 {
 	font-size:24px;
-	padding: 10px 16px 13px 56px;
+	padding: 10px 60px 13px 56px;
+	position:relative;
+	width:auto;
 }
 .palm-page-header.fixed:after,.palm-page-header-fixed-after
 {
@@ -124,6 +126,21 @@
 	opacity:0.3;
 }
 
+#toggleIcon
+{
+	position:absolute;
+	right:10px;
+	top:5px;
+	width:32px; 
+	height:32px;
+	background: url(../images/toggle_all.png) no-repeat center;
+	padding: 10px 5px 0px 0px;
+	float:left;	
+}
+#toggleIcon.unread
+{
+	background: url(../images/toggle_new.png) no-repeat center;
+}
 .feedItem
 {
 	position:relative;

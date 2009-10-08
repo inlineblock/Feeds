@@ -4,7 +4,7 @@ MainAssistant = Class.create(Delicious.Assistant , {
 	{
 		this.model = {listTitle: 'Feeds' , items: []};
 		this.attributes = { itemTemplate: "main/feedItem" , listTemplate: "main/list" ,
-             				swipeToDelete: false , reorderable: false , renderLimit: 500 };
+             				swipeToDelete: true , reorderable: false , renderLimit: 500 };
         this.createListeners();
 	},
 	
@@ -12,6 +12,7 @@ MainAssistant = Class.create(Delicious.Assistant , {
 	{
 		this.addNewFeed = this.addNewFeed.bindAsEventListener(this);
 		this.listTapHandler = this.listTapHandler.bindAsEventListener(this);
+		this.listDeleteHandler = this.listDeleteHandler.bindAsEventListener(this);
 		this._refreshCounts = this.refreshCounts.bindAsEventListener(this);
 	},
 	
@@ -74,6 +75,7 @@ MainAssistant = Class.create(Delicious.Assistant , {
 		if (feedsList)
 		{
 			feedsList.observe(Mojo.Event.listTap , this.listTapHandler);
+			feedsList.observe(Mojo.Event.listDelete , this.listDeleteHandler);
 		}
 		
 		this.countChanged();
@@ -86,6 +88,7 @@ MainAssistant = Class.create(Delicious.Assistant , {
 		var feedsList = this.controller.get('feedsList');
 		if (feedsList)
 		{
+			feedsList.stopObserving(Mojo.Event.listDelete , this.listDeleteHandler);
 			feedsList.stopObserving(Mojo.Event.listTap , this.listTapHandler);
 		}
 		
@@ -128,6 +131,16 @@ MainAssistant = Class.create(Delicious.Assistant , {
 		}
 	},
 	
+	listDeleteHandler: function(event)
+	{
+		var item = event.item;
+		if (item)
+		{
+			this.showLoading();
+			this.manager.deleteFeed(item , this.deleteFeedCallBack.bind(this));
+		}
+	},
+	
 	fullRefreshList: function()
 	{
 		this.controller.stageController.swapScene({name: 'main' , transition: Mojo.Transition.crossFade});
@@ -161,14 +174,11 @@ MainAssistant = Class.create(Delicious.Assistant , {
 	{
 		this._isRefreshing = false;
 		this.hideSmallLoader();
-		if (worked)
-		{
-			this.countChanged();
-		}
-		else
+		if (!worked)
 		{
 			this.errorDialog(Feeds.Message.Error.getUnreadCounts);
 		}
+		this.countChanged();
 	},
 	
 	modelChanged: function()
@@ -178,8 +188,11 @@ MainAssistant = Class.create(Delicious.Assistant , {
 	
 	countChanged: function()
 	{
-		this.model.items = this.manager.getDisplayItems();
-		this.modelChanged();
+		if (this.manager)
+		{
+			this.model.items = this.manager.getDisplayItems();
+			this.modelChanged();
+		}
 	},
 	
 	getFeeds: function()
@@ -199,7 +212,7 @@ MainAssistant = Class.create(Delicious.Assistant , {
 	
 	addNewFeed: function()
 	{
-		this.controller.stageController.pushScene('add-feed');
+		this.controller.stageController.pushScene('add-feed' , {manager: this.manager});
 	},
 	
 	getAllFeeds: function(t)
@@ -245,6 +258,16 @@ MainAssistant = Class.create(Delicious.Assistant , {
 			this.hideSmallLoader();
 			this.errorDialog('Unable to mark all as read.');
 		}
+	},
+	
+	deleteFeedCallBack: function(worked)
+	{
+		this.hideLoading();
+		if (!worked)
+		{
+			this.errorDialog('Unable to delete feed from Google Reader.');
+		}
+		this.countChanged();
 	},
 	
 	showSmallLoader: function()

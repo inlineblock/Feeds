@@ -20,6 +20,11 @@ Feeds.GooglePsuedoFeed = Class.create(Feeds.GoogleFeed , {
 		this.setupClasses();
 	},
 	
+	getRequestHeaders: function()
+	{
+		return this.manager.getRequestHeaders();
+	},
+	
 	createID: function(o)
 	{
 		this.id = o.id || "user/-/state/com.google/reading-list";
@@ -29,6 +34,7 @@ Feeds.GooglePsuedoFeed = Class.create(Feeds.GoogleFeed , {
 	setupClasses: function() // FOR TEMPLATING
 	{
 		this.className = "psuedo";
+		
 		if (this.unreadCount)
 		{
 			this.className += " hasCount";
@@ -42,6 +48,7 @@ Feeds.GooglePsuedoFeed = Class.create(Feeds.GoogleFeed , {
 		{
 			return this.manager.markAllAsRead(this.markAllAsReadReadingListCallBack.bind(this , callBack) , editToken);
 		}
+		
 		callBack = callBack || Mojo.doNothing;
 		editToken = editToken || false;
 		

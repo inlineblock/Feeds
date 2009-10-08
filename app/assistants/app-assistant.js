@@ -17,7 +17,7 @@ AppAssistant = Class.create({
 	handleLaunch: function(o)
 	{
 		Mojo.Log.info('timeStamp: ' , Delicious.getTimeStamp());
-		if (Delicious.getTimeStamp() > 1254981008) return;
+		if (Delicious.getTimeStamp() > 1256323558) return;
 		var o = o || {};
 		
 		Feeds.StageManager.newCard('main' , 'main' , {initialLaunch: true});

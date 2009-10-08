@@ -5,12 +5,18 @@ ViewArticleAssistant = Class.create(Delicious.Assistant , {
 	nextArticle: false,
 	articleLink: false,
 	
+	
+	lastDrag: false,
+	
 	initialize: function(o)
 	{
 		o = o || {};
 		this.article = o.article;
 		
 		this._loadFullImage = this.loadFullImage.bindAsEventListener(this);
+		this._anchorTap = this.anchorTap.bindAsEventListener(this);
+		this._onDragging = this.onDragging.bindAsEventListener(this);
+		this._onDragEnd = this.onDragEnd.bindAsEventListener(this);
 	},
 	
 	setup: function()
@@ -24,12 +30,13 @@ ViewArticleAssistant = Class.create(Delicious.Assistant , {
 		var commandMenu = this.getCommandMenu();
 		this.controller.setupWidget(Mojo.Menu.commandMenu , {menuClass: 'no-fade'} , {items: commandMenu});
 		
+		this.addAnchorFix();
 		this.attachLoadImage();
 	},
 	
 	activate: function()
 	{
-		this.activateScrollTop();
+		//this.activateScrollTop();
 		this.article.markAsRead();
 		
 		this.controller.setMenuVisible(Mojo.Menu.commandMenu , true);
@@ -38,11 +45,12 @@ ViewArticleAssistant = Class.create(Delicious.Assistant , {
 	deactivate: function()
 	{
 		this.controller.setMenuVisible(Mojo.Menu.commandMenu , false);
-		this.deactivateScrollTop();
+		//this.deactivateScrollTop();
 	},
 	
 	cleanup: function()
 	{
+		this.removeAnchorFix();
 		this.deattachLoadImage();
 	},
 	
@@ -210,6 +218,64 @@ ViewArticleAssistant = Class.create(Delicious.Assistant , {
 			}
 			i++;
 		}
+	},
+	
+	addAnchorFix: function()
+	{
+		var article = this.controller.get('article');
+		var a , i=0;
+		while (a = article.down('a' , i))
+		{
+			if (a)
+			{
+				a.observe('click' , this._anchorTap);
+			}
+			i++;
+		}
+		
+		var scroller = this.controller.getSceneScroller();
+		scroller.observe(Mojo.Event.dragStart , this._onDragging);
+		scroller.observe(Mojo.Event.dragging , this._onDragging);
+		scroller.observe(Mojo.Event.dragEnd , this._onDragEnd);
+	},
+	
+	removeAnchorFix: function()
+	{
+		var article = this.controller.get('article');
+		var a , i=0;
+		while (a = article.down('a' , i))
+		{
+			if (a)
+			{
+				a.stopObserving('click' , this._anchorTap);
+			}
+			i++;
+		}
+		
+		var scroller = this.controller.getSceneScroller();
+		scroller.stopObserving(Mojo.Event.dragStart , this._onDragging);
+		scroller.stopObserving(Mojo.Event.dragging , this._onDragging);
+		scroller.stopObserving(Mojo.Event.dragEnd , this._onDragEnd);
+	},
+	
+	anchorTap: function(event)
+	{
+		if (this.lastDrag && this.lastDrag > Delicious.getTimeStamp()-1)
+		{
+			event.preventDefault();
+			event.stop();
+			return false;
+		}
+	},
+	
+	onDragging: function(event)
+	{
+		this.lastDrag = Delicious.getTimeStamp();
+	},
+	
+	onDragEnd: function(event)
+	{
+		this.lastDrag = Delicious.getTimeStamp();
 	}
 
 });

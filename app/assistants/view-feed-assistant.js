@@ -18,6 +18,7 @@ ViewFeedAssistant = Class.create(Delicious.Assistant , {
 		this.listTapHandler = this.listTapHandler.bindAsEventListener(this);
 		this._refreshList = this.refreshList.bindAsEventListener(this);
 		this._loadMoreList = this.loadMoreList.bindAsEventListener(this);
+		this._showMenu = this.showMenu.bindAsEventListener(this);
 	},
 	
 	setup: function()
@@ -27,9 +28,12 @@ ViewFeedAssistant = Class.create(Delicious.Assistant , {
 		title.innerHTML = this.feed.title;
 		
 		this.controller.setupWidget('articlesList' , this.attributes , this.model);
-		this.feed.getArticles(this.getArticlesCallBack.bind(this));
+		
+		this.feed.getArticles(this.getArticlesCallBack.bind(this) , Feeds.Preferences.getAllUnreadSettings());
 		
 		this.controller.setupWidget(Mojo.Menu.appMenu , {} , {items:[{label: $L('Mark All As Read') , command: "markAllAsRead"}]});
+		
+		this.setToggleClassName();
 	},
 	
 	activate: function(o)
@@ -38,6 +42,12 @@ ViewFeedAssistant = Class.create(Delicious.Assistant , {
 		if (articlesList)
 		{
 			articlesList.observe(Mojo.Event.listTap , this.listTapHandler);
+		}
+		
+		var toggleIcon = this.controller.get('toggleIcon');
+		if (toggleIcon)
+		{
+			toggleIcon.observe(Mojo.Event.tap , this._showMenu);
 		}
 		
 		var appIcon = this.controller.get('appIcon');
@@ -62,6 +72,12 @@ ViewFeedAssistant = Class.create(Delicious.Assistant , {
 		if (articlesList)
 		{
 			articlesList.stopObserving(Mojo.Event.listTap , this.listTapHandler);
+		}
+		
+		var toggleIcon = this.controller.get('toggleIcon');
+		if (toggleIcon)
+		{
+			toggleIcon.stopObserving(Mojo.Event.tap , this._showMenu);
 		}
 		
 		var appIcon = this.controller.get('appIcon');
@@ -124,11 +140,14 @@ ViewFeedAssistant = Class.create(Delicious.Assistant , {
 	
 	refreshList: function()
 	{
-		if (this._isRefreshing) return;
+		if (this._isRefreshing)
+		{
+			return;
+		}
 		
 		this.showSmallLoader();
 		this._isRefreshing = true;
-		this.feed.refreshArticles(this.refreshListCallBack.bind(this));
+		this.feed.refreshArticles(this.refreshListCallBack.bind(this) , Feeds.Preferences.getAllUnreadSettings());
 	},
 	
 	refreshListCallBack: function()
@@ -141,7 +160,7 @@ ViewFeedAssistant = Class.create(Delicious.Assistant , {
 	
 	loadMoreList: function(e)
 	{
-		if (this._isRefreshing) return;
+		if (this._isRefreshing){ return; }
 		var loadMore = this.controller.get('loadMore');
 		if (loadMore)
 		{
@@ -149,7 +168,7 @@ ViewFeedAssistant = Class.create(Delicious.Assistant , {
 		}
 		this.showSmallLoader();
 		this._isRefreshing = true;
-		this.feed.loadMoreArticles(this.loadMoreListCallBack.bind(this));
+		this.feed.loadMoreArticles(this.loadMoreListCallBack.bind(this) , Feeds.Preferences.getAllUnreadSettings());
 	},
 	
 	loadMoreListCallBack: function()
@@ -196,10 +215,10 @@ ViewFeedAssistant = Class.create(Delicious.Assistant , {
 	markAllAsRead: function()
 	{
 		this.feed.markAllAsRead(this.markAllAsReadCallBack.bind(this));
-		if (this._isRefreshing) return;
+		if (this._isRefreshing){ return; }
 		
 		this.showSmallLoader();
-		this._isRefreshing = true
+		this._isRefreshing = true;
 	},
 	
 	markAllAsReadCallBack: function(finished)
@@ -236,6 +255,43 @@ ViewFeedAssistant = Class.create(Delicious.Assistant , {
 		}
 		
 		this.doHandleCommand(event);
+	},
+	
+	
+	showMenu: function()
+	{
+		var toggle = Feeds.Preferences.getAllUnreadSettings();
+		this.openElement = this.controller.popupSubmenu({ onChoose:this.showMenuChoose.bind(this) ,
+																placeNear: this.controller.get('toggleIcon') ,
+																toggleCmd: toggle ,
+																items: [{label:'View All Items' , command:'all'} , {label:'View Unread Items' , command:'unread'}]
+															  });
+	},
+	
+	showMenuChoose: function(value)
+	{
+		if (!value) return;
+		var toggle = Feeds.Preferences.getAllUnreadSettings();
+		if (value != toggle)
+		{
+			Feeds.Preferences.setAllUnreadSettings(value);
+			this.showLoader();
+			this.setToggleClassName();
+			this.feed.resetArticles();
+			this.model.items = [];
+			this.modelChanged();
+			
+			this.feed.getArticles(this.getArticlesCallBack.bind(this) , value);
+		}
+	},
+	
+	setToggleClassName: function()
+	{
+		var toggle = this.controller.get('toggleIcon');
+		if (toggle)
+		{
+			toggle.removeClassName('all').removeClassName('unread').addClassName(Feeds.Preferences.getAllUnreadSettings());
+		}
 	}
 
 });
