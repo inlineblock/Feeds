@@ -101,7 +101,7 @@ MainAssistant = Class.create(Delicious.Assistant , {
 	
 	cleanup: function()
 	{
-		
+		this.manager.abortRequests();
 	},
 	
 	handleCommand: function(event)

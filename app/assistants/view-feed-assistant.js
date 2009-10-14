@@ -95,6 +95,11 @@ ViewFeedAssistant = Class.create(Delicious.Assistant , {
 		this.deactivateScrollTop();
 	},
 	
+	cleanup: function()
+	{
+		this.feed.abortRequests();
+	},
+	
 	listTapHandler: function(event)
 	{
 		var article = event.item;

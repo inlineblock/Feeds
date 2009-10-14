@@ -108,21 +108,39 @@ Feeds.GoogleArticle = Class.create({
 		return false;
 	},
 	
-	markAsRead: function(token)
+	markAsRead: function(callBack , token)
 	{
-		if (this.hasBeenRead()) return false;
+		callBack = callBack || Mojo.doNothing;
+		if (this.hasBeenRead()) return callBack(false);
 		
 		var token = token || false;
+		if (token === -1) return callBack(false);
 		if (!token)
 		{
-			this.feed.manager.getEditToken(this.markAsRead.bind(this));
+			this.feed.manager.getEditToken(this.markAsRead.bind(this , callBack));
 			return;
 		}
-		var params = {method:'post'};
+		var params = {method:'post' ,  onSuccess: this.markAsReadSuccess.bind(this , callBack) , onFailure: this.markAsReadFailure.bind(this , callBack)};
 		params.requestHeaders = this.feed.manager.getRequestHeaders();
-		params.parameters = {'T':token , a: this.getUnreadTag() , async: 'true' , i: this.id , s:this.feed.id , onSuccess: this.decrementFeedUnreadCount.bind(this)}; 
+		params.parameters = {'T':token , a: this.getUnreadTag() , async: 'true' , i: this.id , s:this.feed.id}; 
 		this.ajaxRequest = new Ajax.Request('http://www.google.com/reader/api/0/edit-tag?client=PalmPre' , params);
-		this.decrementFeedUnreadCount();
+		
+	},
+	
+	markAsReadSuccess: function(callBack , t)
+	{
+		callBack = callBack || Mojo.doNothing;
+		if (t.status == 200)
+		{
+			this.decrementFeedUnreadCount();
+		}
+		callBack(worked);
+	},
+	
+	markAsReadFailure: function(callBack , t)
+	{
+		callBack = callBack || Mojo.doNothing;
+		callBack(false);
 	},
 	
 	decrementFeedUnreadCount: function(t)
@@ -170,6 +188,14 @@ Feeds.GoogleArticle = Class.create({
 			}
 		}
 		return false;
+	},
+	
+	abortRequests: function()
+	{
+		if (this.ajaxRequest)
+		{
+			this.ajaxRequest.transport.abort();
+		}
 	}
 	
 });

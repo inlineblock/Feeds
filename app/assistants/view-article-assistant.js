@@ -52,6 +52,7 @@ ViewArticleAssistant = Class.create(Delicious.Assistant , {
 	{
 		this.removeAnchorFix();
 		this.deattachLoadImage();
+		this.article.abortRequests();
 	},
 	
 	getArticleTemplate: function()

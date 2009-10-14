@@ -185,7 +185,7 @@ Feeds.GoogleManager  = Class.create({
 		if (!this.editToken) return false;
 		
 		this.editToken = this.editToken || {};
-		var lastTime = this.editToken.timeStamp;
+		var lastTime = this.editToken.timeStamp; 
 		
 		var dateTime = Delicious.getTimeStamp();
 		
@@ -207,13 +207,12 @@ Feeds.GoogleManager  = Class.create({
 	
 	getEditToken: function(callBack)
 	{
-		Mojo.Log.info('getEditToken');
 		var callBack = callBack || Mojo.doNothing;
 		var token = this.getLastEditToken();
 		if (!token)
 		{
 			var params = {method:'get' , onSuccess: this.getEditTokenSuccess.bind(this , callBack) , onFailure: this.getEditTokenFailure.bind(this , callBack)};
-			this.getToken = new Ajax.Request('http://www.google.com/reader/api/0/token' , params);
+			this.getTokenAjax = new Ajax.Request('http://www.google.com/reader/api/0/token' , params);
 		}
 		else
 		{
@@ -224,14 +223,15 @@ Feeds.GoogleManager  = Class.create({
 	getEditTokenSuccess: function(callBack , t)
 	{
 		var callBack = callBack || Mojo.doNothing;
-		if (t.status != 200) this.getEditTokenFailure(callBack);
+		if (t.status != 200 || t.responseText.length < 3 ) this.getEditTokenFailure(callBack);
 		//this.setEditToken(t.responseText);
 		callBack(t.responseText);
 	},
 	
 	getEditTokenFailure: function(callBack , t)
 	{
-		callBack(false);
+		callBack = callBack || Mojo.doNothing;
+		callBack(-1);
 	},
 	
 	addFeedToCategories: function(feed)
@@ -331,7 +331,7 @@ Feeds.GoogleManager  = Class.create({
 			this.getEditToken(this.markAllAsRead.bind(this , callBack));
 			return;
 		}
-		
+		if (editToken === -1) return callBack(false);
 		var baseURL = "http://www.google.com/reader/api/0/mark-all-as-read?client=PalmPre";
 		var params = {method: 'post' , onSuccess: this.markAllAsReadSuccess.bind(this , callBack) , onFailure: this.markAllAsReadFailure.bind(this , callBack)};
 		params.parameters = {
@@ -342,7 +342,7 @@ Feeds.GoogleManager  = Class.create({
 		};
 		params.requestHeaders = this.getRequestHeaders();
 		
-		this._ajaxRequest = new Ajax.Request(baseURL , params);
+		this.ajaxRequest = new Ajax.Request(baseURL , params);
 	},
 	
 	markAllAsReadSuccess: function(callBack , t)
@@ -381,6 +381,8 @@ Feeds.GoogleManager  = Class.create({
 			return;
 		}
 		
+		if (editToken === -1) return callBack(false);
+		
 		var baseURL = "http://www.google.com/reader/api/0/subscription/quickadd?client=PalmPre";
 		var params = {method: 'post' , onSuccess: this.addFeedSuccess.bind(this , callBack) , onFailure: this.addFeedFailure.bind(this , callBack)};
 		params.parameters = {
@@ -389,7 +391,7 @@ Feeds.GoogleManager  = Class.create({
 		};
 		params.requestHeaders = this.getRequestHeaders();
 		
-		this._ajaxRequest = new Ajax.Request(baseURL , params);
+		this.ajaxRequest = new Ajax.Request(baseURL , params);
 	},
 	
 	addFeedSuccess: function(callBack , t)
@@ -432,7 +434,7 @@ Feeds.GoogleManager  = Class.create({
 			this.getEditToken(this.deleteFeed.bind(this , feed , callBack));
 			return;
 		}
-		
+		if (editToken === -1) return callBack(false);
 		var baseURL = "http://www.google.com/reader/api/0/subscription/edit?client=settings";
 		var params = {method: 'post' , onSuccess: this.deleteFeedSuccess.bind(this , feed , callBack) , onFailure: this.deleteFeedFailure.bind(this , feed , callBack)};
 		params.parameters = {
@@ -443,7 +445,7 @@ Feeds.GoogleManager  = Class.create({
 		};
 		params.requestHeaders = this.getRequestHeaders();
 		
-		this._ajaxRequest = new Ajax.Request(baseURL , params);
+		this.ajaxRequest = new Ajax.Request(baseURL , params);
 	},
 	
 	deleteFeedSuccess: function(feed , callBack , t)
@@ -475,9 +477,14 @@ Feeds.GoogleManager  = Class.create({
 			}
 		}
 		catch(e){}
-		
-		
-		
+	},
+	
+	abortRequests: function()
+	{
+		if (this.ajaxRequest && this.ajaxRequest.transport && this.ajaxRequest.transport.abort)
+		{
+			this.ajaxRequest.transport.abort();
+		}
 	}
 
 });

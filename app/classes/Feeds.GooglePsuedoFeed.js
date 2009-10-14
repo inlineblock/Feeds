@@ -52,6 +52,7 @@ Feeds.GooglePsuedoFeed = Class.create(Feeds.GoogleFeed , {
 		callBack = callBack || Mojo.doNothing;
 		editToken = editToken || false;
 		
+		if (editToken === -1) return callBack(false);
 		if (!editToken)
 		{
 			this.getEditToken(this.markAllAsRead.bind(this , callBack));
@@ -68,7 +69,7 @@ Feeds.GooglePsuedoFeed = Class.create(Feeds.GoogleFeed , {
 		};
 		params.requestHeaders = this.manager.getRequestHeaders();
 		this.blindMarkAllAsRead();
-		this._ajaxRequest = new Ajax.Request(baseURL , params);
+		this.ajaxRequest = new Ajax.Request(baseURL , params);
 	},
 	
 	markAllAsReadSuccess: function(callBack , t)

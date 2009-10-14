@@ -225,6 +225,7 @@ Feeds.GoogleFeed = Class.create({
 		callBack = callBack || Mojo.doNothing;
 		editToken = editToken || false;
 		
+		if (editToken === -1) return callBack(false);
 		if (!editToken)
 		{
 			this.manager.getEditToken(this.markAllAsRead.bind(this , callBack));
@@ -241,7 +242,7 @@ Feeds.GoogleFeed = Class.create({
 		};
 		params.requestHeaders = this.getRequestHeaders();
 		
-		this._ajaxRequest = new Ajax.Request(baseURL , params);
+		this.ajaxRequest = new Ajax.Request(baseURL , params);
 	},
 	
 	markAllAsReadSuccess: function(callBack , t)
@@ -304,6 +305,14 @@ Feeds.GoogleFeed = Class.create({
 		}
 		
 		this.articles = articles;
+	},
+	
+	abortRequests: function()
+	{
+		if (this.ajaxRequest && this.ajaxRequest.transport && this.ajaxRequest.transport.abort)
+		{
+			this.ajaxRequest.transport.abort();
+		}
 	}
 	
 });

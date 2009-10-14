@@ -82,5 +82,13 @@ Feeds.GoogleFolder = Class.create({
 	getRequestHeaders: function()
 	{
 		return this.manager.getRequestHeaders();
+	},
+	
+	abortRequests: function()
+	{
+		if (this.ajaxRequest && this.ajaxRequest.transport && this.ajaxRequest.transport.abort)
+		{
+			this.ajaxRequest.transport.abort();
+		}
 	}
 });
