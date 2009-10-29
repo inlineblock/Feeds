@@ -42,48 +42,17 @@ Feeds.GooglePsuedoFeed = Class.create(Feeds.GoogleFeed , {
 		this.className = this.className.trim();
 	},
 	
-	markAllAsRead: function(callBack , editToken)
+	markAllAsRead: function(callBack)
 	{
 		if (this.id == "user/-/state/com.google/reading-list")
 		{
 			return this.manager.markAllAsRead(this.markAllAsReadReadingListCallBack.bind(this , callBack) , editToken);
 		}
-		
-		callBack = callBack || Mojo.doNothing;
-		editToken = editToken || false;
-		
-		if (editToken === -1) return callBack(false);
-		if (!editToken)
+		else
 		{
-			this.getEditToken(this.markAllAsRead.bind(this , callBack));
-			return;
+			return this.manager.markAllAsRead(callBack);
 		}
 		
-		var baseURL = "http://www.google.com/reader/api/0/mark-all-as-read?client=PalmPre";
-		var params = {method: 'post' , onSuccess: this.markAllAsReadSuccess.bind(this , callBack) , onFailure: this.markAllAsReadFailure.bind(this , callBack)};
-		params.parameters = {
-			ts: Delicious.getTimeStamp(),
-			s: this.id ,
-			t: this.title ,
-			T: editToken
-		};
-		params.requestHeaders = this.manager.getRequestHeaders();
-		this.blindMarkAllAsRead();
-		this.ajaxRequest = new Ajax.Request(baseURL , params);
-	},
-	
-	markAllAsReadSuccess: function(callBack , t)
-	{
-		callBack = callBack || Mojo.doNothing;
-		if (t.status != 200) return this.markAllAsReadFailure(callBack);
-		
-		return callBack(true);
-	},
-	
-	markAllAsReadFailure: function(callBack ,t)
-	{
-		callBack = callBack || Mojo.doNothing;
-		return callBack(false);
 	},
 	
 	markAllAsReadReadingListCallBack: function(callBack , worked)

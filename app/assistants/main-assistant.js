@@ -10,7 +10,7 @@ MainAssistant = Class.create(Delicious.Assistant , {
 	
 	createListeners: function()
 	{
-		this.addNewFeed = this.addNewFeed.bindAsEventListener(this);
+		this._markAllAsRead = this.markAllAsRead.bindAsEventListener(this);
 		this.listTapHandler = this.listTapHandler.bindAsEventListener(this);
 		this.listDeleteHandler = this.listDeleteHandler.bindAsEventListener(this);
 		this._refreshCounts = this.refreshCounts.bindAsEventListener(this);
@@ -18,7 +18,12 @@ MainAssistant = Class.create(Delicious.Assistant , {
 	
 	setup: function()
 	{
-		this.addIcon = this.controller.get('addIcon');
+		if (Feeds.Preferences.getDarkTheme())
+		{
+			this.controller.getSceneScroller().up('body').addClassName('palm-dark');
+		}
+		
+		this.markIcon = this.controller.get('markIcon');
 		if (!Feeds.Manager)
 		{
 			Feeds.Manager = new Feeds.FeedManager();
@@ -26,9 +31,9 @@ MainAssistant = Class.create(Delicious.Assistant , {
 		this.controller.setupWidget('feedsList' , this.attributes , this.model);
 		this.showLoader();
 		
-		
 		var appMenu = this.getAppMenu();
 		appMenu.push({label: $L('Mark All As Read') , command: "markAllAsRead"});
+		appMenu.push({label: $L('Add New Feed') , command: 'addNewFeed'});
 		this.controller.setupWidget(Mojo.Menu.appMenu , {} , {visible: true , items: appMenu});
 		
 		if (Feeds.GoogleAccount.isLoggedIn())
@@ -47,7 +52,7 @@ MainAssistant = Class.create(Delicious.Assistant , {
 	{
 		var o = o || {};
 		this.activateScrollTop();
-		this.addIcon.observe(Mojo.Event.tap , this.addNewFeed);
+		this.markIcon.observe(Mojo.Event.tap , this._markAllAsRead);
 		
 		var appIcon = this.controller.get('appIcon');
 		if (appIcon)
@@ -84,7 +89,7 @@ MainAssistant = Class.create(Delicious.Assistant , {
 	deactivate: function()
 	{
 		this.deactivateScrollTop();
-		this.addIcon.stopObserving(Mojo.Event.tap , this.addNewFeed);
+		this.markIcon.stopObserving(Mojo.Event.tap , this._markAllAsRead);
 		var feedsList = this.controller.get('feedsList');
 		if (feedsList)
 		{
@@ -112,6 +117,10 @@ MainAssistant = Class.create(Delicious.Assistant , {
 			{
 				case "markAllAsRead":
 					return window.setTimeout(this.markAllAsRead.bind(this) , 50); // this prevents the stutter of the appmenu when going up.
+				break;
+				
+				case "addNewFeed":
+					this.addNewFeed();
 				break;
 			}
 		}

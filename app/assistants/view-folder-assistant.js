@@ -24,8 +24,7 @@ ViewFolderAssistant = Class.create(Delicious.Assistant , {
 		var title = this.controller.get('folderTitle');
 		title.innerHTML = this.folder.title;
 		
-		var appMenu = this.getAppMenu();
-		this.controller.setupWidget(Mojo.Menu.appMenu , {} , {visible: true , items: appMenu});
+		this.controller.setupWidget(Mojo.Menu.appMenu , {} , {items:[{label: $L('Mark All As Read') , command: "markAllAsRead"}]});
 		this.model.items = this.folder.display;
 		
 		this.controller.setupWidget('feedsList' , this.attributes , this.model);
@@ -61,7 +60,47 @@ ViewFolderAssistant = Class.create(Delicious.Assistant , {
 	
 	handleCommand: function(event)
 	{
+		if (event.type == Mojo.Event.command) 
+		{
+			switch (event.command) 
+			{
+				case "markAllAsRead":
+					return window.setTimeout(this.markAllAsRead.bind(this) , 50); // this prevents the stutter of the appmenu when going up.
+				break;
+			}
+		}
 		this.doHandleCommand(event);
+	},
+	
+	markAllAsRead: function()
+	{
+	
+		try
+		{
+		this.folder.markAllAsRead(this.markAllAsReadCallBack.bind(this));
+		if (this._isRefreshing){ return; }
+		
+		this.showLoader();
+		this._isRefreshing = true;
+		}
+		catch(e)
+		{
+			Mojo.Log.error("ERRORS" , Object.toJSON(e));
+		}
+	},
+	
+	markAllAsReadCallBack: function(finished)
+	{
+		this._isRefreshing = false;
+		this.hideLoader();
+		if (finished)
+		{
+			this.modelChanged();
+		}
+		else
+		{
+			this.errorDialog('Unable to mark all as read.');
+		}
 	},
 	
 	modelChanged: function()

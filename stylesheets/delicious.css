@@ -1,0 +1,6 @@
+#palm-scrim,#scrim,#nightShade
+{
+	z-index: 6500;
+	background: transparent url(../images/scrim.png) center center no-repeat;
+	opacity:0.75;
+}

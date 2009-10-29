@@ -125,6 +125,22 @@
 {
 	opacity:0.3;
 }
+#markIcon
+{
+	position:absolute;
+	right:10px;
+	top:5px;
+	width:32px; 
+	height:32px;
+	background: url(../images/mark_icon.png) no-repeat center;
+	padding: 10px 5px 0px 0px;
+	float:left;	
+}
+#markIcon:active
+{
+	opacity:0.3;
+}
+
 
 #toggleIcon
 {
@@ -194,8 +210,6 @@
 	min-width:26px;
 	padding:0 2px;
 	color:#5E7C90;
-	*background: transparent url('../images/unreadcount.png') center center no-repeat;
-	*background: #37596F;
 	top:8px;
 	right:10px;
 	text-align: center;

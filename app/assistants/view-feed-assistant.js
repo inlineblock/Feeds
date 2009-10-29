@@ -232,7 +232,15 @@ ViewFeedAssistant = Class.create(Delicious.Assistant , {
 		this.hideSmallLoader();
 		if (finished)
 		{
-			this.articlesChanged();
+			if (this.feed.type == 'psuedoFeed')
+			{
+				this.feed.blindMarkAllAsRead();
+				this.articlesChanged();
+			}
+			else
+			{
+				this.articlesChanged();
+			}
 		}
 		else
 		{

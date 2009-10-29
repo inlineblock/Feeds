@@ -106,5 +106,20 @@ Feeds.Preferences = {
 		}
 		
 		Feeds.Preferences.saveAll();
+	},
+	
+	setDarkTheme: function(val)
+	{
+		var val = (val ? true : false);
+		Feeds.Preferences.settings.darkTheme = val;
+		Feeds.Preferences.saveAll();
+		
+	},
+	
+	getDarkTheme: function()
+	{
+		Feeds.Preferences.initAllPreferences();
+		return (Feeds.Preferences.settings.darkTheme ? true : false);
+		
 	}
 };
