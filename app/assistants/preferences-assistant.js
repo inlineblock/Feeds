@@ -2,8 +2,9 @@ PreferencesAssistant = Class.create(Delicious.Assistant , {
 	initialize: function()
 	{
 		this._onSettingChange = this.onSettingChange.bindAsEventListener(this);
-		
 		this._onThemeChange = this.onThemeChange.bindAsEventListener(this);
+		
+		this._landscapeChange = this.landscapeChange.bindAsEventListener(this);
 	},
 	
 	setup: function()
@@ -15,6 +16,12 @@ PreferencesAssistant = Class.create(Delicious.Assistant , {
 		
 		this.darkThemeModel = {value: Feeds.Preferences.getDarkTheme()};
 		this.controller.setupWidget('darkThemeToggle' , { trueValue: true , falseValue: false } , this.darkThemeModel);
+		
+		var landscape = Feeds.Preferences.getLandscapeSettings();
+		this.landscapeModeModel = {value: landscape.enabled};
+		this.controller.setupWidget('landscapeModeToggle' , { trueValue: true , falseValue: false } , this.landscapeModeModel);
+		this.scrollGesturesModel = {value: landscape.gestures};
+		this.controller.setupWidget('scrollGesturesToggle' , { trueValue: true , falseValue: false } , this.scrollGesturesModel);
 
 	},
 	
@@ -23,10 +30,13 @@ PreferencesAssistant = Class.create(Delicious.Assistant , {
 		var countSelector = this.controller.get('countSelector');
 		countSelector.observe(Mojo.Event.propertyChange, this._onSettingChange);
 		
-		
-		
 		var darkThemeToggle = this.controller.get('darkThemeToggle');
 		darkThemeToggle.observe(Mojo.Event.propertyChange, this._onThemeChange);
+		
+		var landscapeModeToggle = this.controller.get('landscapeModeToggle');
+		landscapeModeToggle.observe(Mojo.Event.propertyChange, this._landscapeChange);
+		var scrollGesturesToggle = this.controller.get('scrollGesturesToggle');
+		scrollGesturesToggle.observe(Mojo.Event.propertyChange, this._landscapeChange);
 	},
 	
 	deactivate: function()
@@ -36,6 +46,11 @@ PreferencesAssistant = Class.create(Delicious.Assistant , {
 		
 		var darkThemeToggle = this.controller.get('darkThemeToggle');
 		darkThemeToggle.stopObserving(Mojo.Event.propertyChange, this._onThemeChange);
+		
+		var landscapeModeToggle = this.controller.get('landscapeModeToggle');
+		landscapeModeToggle.stopObserving(Mojo.Event.propertyChange, this._landscapeChange);
+		var scrollGesturesToggle = this.controller.get('scrollGesturesToggle');
+		scrollGesturesToggle.stopObserving(Mojo.Event.propertyChange, this._landscapeChange);
 	},
 	
 	cleanup: function()
@@ -60,6 +75,12 @@ PreferencesAssistant = Class.create(Delicious.Assistant , {
 		{
 			this.controller.getSceneScroller().up('body').removeClassName('palm-dark');
 		}
+	},
+	
+	landscapeChange: function()
+	{
+		var settings = {enabled: this.landscapeModeModel.value , gestures: this.scrollGesturesModel.value};
+		Feeds.Preferences.setLandscapeSettings(settings);
 	},
 	
 	handleCommand: function()

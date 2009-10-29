@@ -23,6 +23,11 @@ ViewArticleAssistant = Class.create(Delicious.Assistant , {
 	{
 		//var title = this.controller.get('articleTitle');
 		//title.innerHTML = this.article.title;
+		var landscape = Feeds.Preferences.getLandscapeSettings();
+		if (landscape.gestures)
+		{
+			this.controller.useLandscapePageUpDown(true);
+		}
 		
 		var insertHere = this.controller.get('insertHere');
 		insertHere.innerHTML = Mojo.View.render({object: this.article , template: this.getArticleTemplate()});

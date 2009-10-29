@@ -16,6 +16,7 @@ ViewFolderAssistant = Class.create(Delicious.Assistant , {
 	{
 		this.listTapHandler = this.listTapHandler.bindAsEventListener(this);
 		this.listDeleteHandler = this.listDeleteHandler.bindAsEventListener(this);
+		this._markAllAsRead = this.markAllAsRead.bindAsEventListener(this);
 		//this._refreshCounts = this.refreshCounts.bindAsEventListener(this);
 	},
 	
@@ -23,6 +24,8 @@ ViewFolderAssistant = Class.create(Delicious.Assistant , {
 	{
 		var title = this.controller.get('folderTitle');
 		title.innerHTML = this.folder.title;
+		
+		this.markIcon = this.controller.get('markIcon');
 		
 		this.controller.setupWidget(Mojo.Menu.appMenu , {} , {items:[{label: $L('Mark All As Read') , command: "markAllAsRead"}]});
 		this.model.items = this.folder.display;
@@ -34,6 +37,8 @@ ViewFolderAssistant = Class.create(Delicious.Assistant , {
 	{
 		var o = o || {};
 		this.activateScrollTop();
+		
+		this.markIcon.observe(Mojo.Event.tap , this._markAllAsRead);
 		
 		var feedsList = this.controller.get('feedsList');
 		if (feedsList)
@@ -49,6 +54,8 @@ ViewFolderAssistant = Class.create(Delicious.Assistant , {
 	deactivate: function()
 	{
 		this.deactivateScrollTop();
+		
+		this.markIcon.stopObserving(Mojo.Event.tap , this._markAllAsRead);
 		
 		var feedsList = this.controller.get('feedsList');
 		if (feedsList)
@@ -77,11 +84,11 @@ ViewFolderAssistant = Class.create(Delicious.Assistant , {
 	
 		try
 		{
-		this.folder.markAllAsRead(this.markAllAsReadCallBack.bind(this));
-		if (this._isRefreshing){ return; }
-		
-		this.showLoader();
-		this._isRefreshing = true;
+			this.folder.markAllAsRead(this.markAllAsReadCallBack.bind(this));
+			if (this._isRefreshing){ return; }
+			
+			this.showLoader();
+			this._isRefreshing = true;
 		}
 		catch(e)
 		{

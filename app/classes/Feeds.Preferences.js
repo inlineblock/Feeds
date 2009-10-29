@@ -120,6 +120,57 @@ Feeds.Preferences = {
 	{
 		Feeds.Preferences.initAllPreferences();
 		return (Feeds.Preferences.settings.darkTheme ? true : false);
+	},
+	
+	getLandscapeSettings: function()
+	{
+		Feeds.Preferences.initAllPreferences();
+		var settings = Feeds.Preferences.settings.landscape || {enabled:true,gestures:true} , ret = {};
+		Mojo.Log.info('-------getLandscapeSettingssettings' , Object.toJSON(settings));
+		if (settings.enabled)
+		{
+			ret.enabled = true;
+		}
+		else
+		{
+			ret.enabled = false;
+		}
 		
+		if (settings.gestures)
+		{
+			ret.gestures = true;
+		}
+		else
+		{
+			ret.gestures = false;
+		}
+		Mojo.Log.info('-------getLandscapeSettings' , Object.toJSON(ret));
+		return ret;
+	},
+	
+	setLandscapeSettings: function(settings)
+	{
+		var set = {} , settings = settings || {};
+		if (settings.enabled)
+		{
+			set.enabled = true;
+		}
+		else
+		{
+			set.enabled = false;
+		}
+		
+		if (settings.gestures)
+		{
+			set.gestures = true;
+		}
+		else
+		{
+			set.gestures = false;
+		}
+		
+		Mojo.Log.info('-------setLandscapeSettings' , Object.toJSON(set));
+		Feeds.Preferences.settings.landscape = set;
+		Feeds.Preferences.saveAll();
 	}
 };

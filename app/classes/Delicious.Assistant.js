@@ -233,7 +233,8 @@ Delicious.Assistant = Class.create({
 	
 	orientationChanged: function(orientation)
 	{
-		if (this._orientation === orientation)
+		var landscape = Feeds.Preferences.getLandscapeSettings();
+		if (this._orientation === orientation || !landscape.enabled)
 		{
 			return;
 		}

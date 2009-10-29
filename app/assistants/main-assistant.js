@@ -24,6 +24,7 @@ MainAssistant = Class.create(Delicious.Assistant , {
 		}
 		
 		this.markIcon = this.controller.get('markIcon');
+		
 		if (!Feeds.Manager)
 		{
 			Feeds.Manager = new Feeds.FeedManager();
@@ -44,6 +45,8 @@ MainAssistant = Class.create(Delicious.Assistant , {
 		}
 		else
 		{
+			this.msgDialog($L('Welcome to Feeds') , $L('Thank you for downloading Feeds, the premier Google Reader client for WebOS. Please login to Google Reader and to start.') , this.forceLogin.bind(this));
+			//this.controller.stageController.pushScene('login' , {});
 			this.hideLoader();
 		}
 	},
@@ -60,6 +63,11 @@ MainAssistant = Class.create(Delicious.Assistant , {
 			appIcon.observe('click' , this._refreshCounts);
 		}
 		
+		if (o.fullRefresh)
+		{
+			return this.fullRefreshList();
+		}
+		
 		
 		if (o.refresh)
 		{
@@ -71,10 +79,7 @@ MainAssistant = Class.create(Delicious.Assistant , {
 			this.refreshCounts();
 		}
 		
-		if (o.fullRefresh)
-		{
-			this.fullRefreshList();
-		}
+		
 		
 		var feedsList = this.controller.get('feedsList');
 		if (feedsList)
@@ -106,7 +111,10 @@ MainAssistant = Class.create(Delicious.Assistant , {
 	
 	cleanup: function()
 	{
-		this.manager.abortRequests();
+		if (this.manager && this.manager.abortRequests)
+		{
+			this.manager.abortRequests();
+		}
 	},
 	
 	handleCommand: function(event)
@@ -125,6 +133,11 @@ MainAssistant = Class.create(Delicious.Assistant , {
 			}
 		}
 		this.doHandleCommand(event);
+	},
+	
+	forceLogin: function()
+	{
+		this.controller.stageController.pushScene('login');
 	},
 	
 	listTapHandler: function(event)
