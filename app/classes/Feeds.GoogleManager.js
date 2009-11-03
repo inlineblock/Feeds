@@ -269,6 +269,11 @@ Feeds.GoogleManager  = Class.create({
 		}
 	},
 	
+	getFeeds: function()
+	{
+		return this.feeds;
+	},
+	
 	getDisplayItems: function()
 	{
 		try

@@ -7,6 +7,9 @@
 	background: url(../images/icon_32x32.png) no-repeat center center;
 	padding: 10px 0px 0px 5px;
 }
+.palm-dashboard-icon.feeds {
+	background: url(../images/icon_48x48.png) center left no-repeat; 
+}
 .refresh_icon {
 	position:absolute;
 	left:10px;

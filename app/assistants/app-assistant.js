@@ -16,10 +16,25 @@ AppAssistant = Class.create({
 	
 	handleLaunch: function(o)
 	{
-		Mojo.Log.info('--launch timeStamp: ' , Delicious.getTimeStamp());
+		Mojo.Log.info('--appAssistant::handleLaunch timeStamp: ' , Delicious.getTimeStamp());
 		//if (Delicious.getTimeStamp() > 1257745187) return;
 		var o = o || {};
-		Feeds.StageManager.newCard('main' , 'main' , {initialLaunch: true});
+		if (o.checkForUpdates)
+		{
+			Mojo.Log.info('-----checkForUpdates');
+			var notify = new Feeds.Notifications();
+			notify.spawn();
+		}
+		else
+		{
+			Feeds.StageManager.newCard('main' , 'main' , {initialLaunch: true});
+		}
+	},
+	
+	cleanup: function(o)
+	{
+		// fires when the application is done.
+		Mojo.Log.info('--appAssistant::cleanup timeStamp: ' , Delicious.getTimeStamp());
 	},
 	
 	fireTracking: function()

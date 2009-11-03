@@ -1,4 +1,5 @@
 Delicious.Assistant = Class.create({
+	
 	showLoader: function()
 	{
 		this.showNightShade();
@@ -151,6 +152,28 @@ Delicious.Assistant = Class.create({
 		if (main)
 		{
 			main.stopObserving(Mojo.Event.tap , this._scrollToTop);
+		}
+	},
+	
+	activateWindow: function()
+	{
+		if (Feeds.StageManager.stageExists(Feeds.Notifications.stageName))
+		{
+			Feeds.StageManager.close(Feeds.Notifications.stageName);
+		}
+	},
+	
+	deactivateWindow: function()
+	{
+		Mojo.Log.info('--------deactivateWindow');
+		var notify = Feeds.Preferences.getNotificationSettings();
+		if (notify.enabled)
+		{
+			Feeds.Notifications.enable();
+		}
+		else
+		{
+			Feeds.Notifications.disable();
 		}
 	},
 	

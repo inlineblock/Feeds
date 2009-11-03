@@ -21,6 +21,7 @@
     {"source": "app/classes/Feeds.AtomParser.js"},
     {"source": "app/classes/Feeds.Preferences.js"},
     {"source": "app/classes/Feeds.Message.js"},
+    {"source": "app/classes/Feeds.Notifications.js"},
     {
         "scenes": "support",
         "source": "app/assistants/support-assistant.js"
@@ -56,5 +57,9 @@
     {
         "scenes": "preferences",
         "source": "app/assistants/preferences-assistant.js"
+    },
+    {
+        "scenes": "Notification",
+        "source": "app/assistants/Notification-assistant.js"
     }
 ]

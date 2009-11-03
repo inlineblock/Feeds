@@ -5,6 +5,20 @@
 	</div>
 </div>
 
+
+<div class="palm-group unlabeled">
+	<div class="palm-list">
+		<div class="palm-row first last">
+			<div class="palm-row-wrapper">
+				<div x-mojo-element="ToggleButton" id="darkThemeToggle" name="togglebuttonName"></div>
+				<div class="title" x-mojo-loc="">
+                	Use Dark Theme
+            	</div>
+			</div>
+		</div>
+	</div>
+</div>
+
 <div class="palm-group">
 	<div class="palm-group-title">
 		<span x-mojo-loc=''># Articles to Fetch at a Time</span>
@@ -24,7 +38,7 @@
 		<span x-mojo-loc=''>Landscape Settings</span>
 	</div>
 	<div class="palm-list">
-		<div class="palm-row first" x-mojo-tap-highlight="momentary">
+		<div class="palm-row first">
 			<div class="palm-row-wrapper palm-dark">
 				<div x-mojo-element="ToggleButton" id="landscapeModeToggle" class="palm-dark" name="togglebuttonName"></div>
 				<div class="title" x-mojo-loc="">
@@ -32,7 +46,7 @@
             	</div>
 			</div>
 		</div>
-		<div class="palm-row last" x-mojo-tap-highlight="momentary">
+		<div class="palm-row last">
 			<div class="palm-row-wrapper">
 				<div x-mojo-element="ToggleButton" id="scrollGesturesToggle" class="palm-dark" name="checkboxName"></div>
 				<div class="title" x-mojo-loc="">
@@ -43,13 +57,46 @@
 	</div>
 </div>
 
-<div class="palm-group unlabeled">
+
+<div class="palm-group">
+	<div class="palm-group-title">
+		<span x-mojo-loc=''>Notification Settings</span>
+	</div>
 	<div class="palm-list">
-		<div class="palm-row first last">
-			<div class="palm-row-wrapper">
-				<div x-mojo-element="ToggleButton" id="darkThemeToggle" name="togglebuttonName"></div>
+		<div class="palm-row first">
+			<div class="palm-row-wrapper palm-dark">
+				<div x-mojo-element="ToggleButton" id="enableNotificationsToggle" class="palm-dark" name="togglebuttonName"></div>
 				<div class="title" x-mojo-loc="">
-                	Use Dark Theme
+                	Enable Notifications
+            	</div>
+			</div>
+		</div>
+		<div class="palm-row last" x-mojo-tap-highlight="momentary">
+			<div class="palm-row-wrapper">
+				<div x-mojo-element="ListSelector" id="notificationInterval" class="palm-dark" name="checkboxName"></div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="palm-group">
+	<div class="palm-group-title">
+		<span x-mojo-loc=''>Offline Storage Settings</span>
+	</div>
+	<div class="palm-list">
+		<div class="palm-row first">
+			<div class="palm-row-wrapper palm-dark">
+				<div x-mojo-element="ToggleButton" id="offlineUnreadToggle" class="palm-dark" name="togglebuttonName"></div>
+				<div class="title" x-mojo-loc="">
+                	Fetch Unread Only
+            	</div>
+			</div>
+		</div>
+		<div class="palm-row last">
+			<div class="palm-row-wrapper">
+				<div x-mojo-element="ToggleButton" id="offlineNotificationToggle" class="palm-dark" name="checkboxName"></div>
+				<div class="title" x-mojo-loc="">
+                	Auto-Fetch with Notifications
             	</div>
 			</div>
 		</div>

@@ -61,9 +61,14 @@ Feeds.GoogleFeed = Class.create({
 		return this.id || false;
 	},
 	
+	getUnreadCount: function()
+	{
+		return parseInt(this.unreadCount) || 0;
+	},
+	
 	setUnreadCount: function(count)
 	{
-		this.unreadCount = count;
+		this.unreadCount = parseInt(count);
 		this.setupClasses();
 	},
 	

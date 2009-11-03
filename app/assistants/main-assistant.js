@@ -1,7 +1,13 @@
 MainAssistant = Class.create(Delicious.Assistant , {
 	
-	initialize: function()
+	initialize: function(o)
 	{
+		o = o || {};
+		if (o.manager)
+		{
+			this.manager = o.manager;
+		}
+		
 		this.model = {listTitle: 'Feeds' , items: []};
 		this.attributes = { itemTemplate: "main/feedItem" , listTemplate: "main/list" ,
              				swipeToDelete: true , reorderable: false , renderLimit: 500 };
@@ -25,29 +31,38 @@ MainAssistant = Class.create(Delicious.Assistant , {
 		
 		this.markIcon = this.controller.get('markIcon');
 		
-		if (!Feeds.Manager)
-		{
-			Feeds.Manager = new Feeds.FeedManager();
-		}
 		this.controller.setupWidget('feedsList' , this.attributes , this.model);
-		this.showLoader();
+		
 		
 		var appMenu = this.getAppMenu();
 		appMenu.push({label: $L('Mark All As Read') , command: "markAllAsRead"});
 		appMenu.push({label: $L('Add New Feed') , command: 'addNewFeed'});
 		this.controller.setupWidget(Mojo.Menu.appMenu , {} , {visible: true , items: appMenu});
 		
-		if (Feeds.GoogleAccount.isLoggedIn())
+		Mojo.Event.listen(this.controller.stageController.document , Mojo.Event.stageDeactivate, this.deactivateWindow.bindAsEventListener(this));
+		Mojo.Event.listen(this.controller.stageController.document , Mojo.Event.stageActivate, this.activateWindow.bindAsEventListener(this));
+		
+		
+		
+		if (!this.manager)
 		{
-			this.manager = Feeds.GoogleAccount.getManager();
-			var loginInfo = Feeds.GoogleAccount.getLogin();
-			this.manager.login(loginInfo.email , loginInfo.password , this.getAllFeeds.bind(this));
+			this.showLoader();
+			if (Feeds.GoogleAccount.isLoggedIn())
+			{
+				this.manager = Feeds.GoogleAccount.getManager();
+				var loginInfo = Feeds.GoogleAccount.getLogin();
+				this.manager.login(loginInfo.email , loginInfo.password , this.loginComplete.bind(this));
+			}
+			else
+			{
+				this.msgDialog($L('Welcome to Feeds') , $L('Thank you for downloading Feeds, the premier Google Reader client for WebOS. <br/>We will now have you login to Google Reader and to start.') , this.forceLogin.bind(this));
+				//this.controller.stageController.pushScene('login' , {});
+				this.hideLoader();
+			}
 		}
 		else
 		{
-			this.msgDialog($L('Welcome to Feeds') , $L('Thank you for downloading Feeds, the premier Google Reader client for WebOS. Please login to Google Reader and to start.') , this.forceLogin.bind(this));
-			//this.controller.stageController.pushScene('login' , {});
-			this.hideLoader();
+			this.countChanged();
 		}
 	},
 	
@@ -182,7 +197,7 @@ MainAssistant = Class.create(Delicious.Assistant , {
 			this.showLoader();
 			this.manager = Feeds.GoogleAccount.getManager();
 			var loginInfo = Feeds.GoogleAccount.getLogin();
-			this.manager.login(loginInfo.email , loginInfo.password , this.getAllFeeds.bind(this));
+			this.manager.login(loginInfo.email , loginInfo.password , this.loginComplete.bind(this));
 		}
 		else
 		{
@@ -237,9 +252,14 @@ MainAssistant = Class.create(Delicious.Assistant , {
 		this.controller.stageController.pushScene('add-feed' , {manager: this.manager});
 	},
 	
-	getAllFeeds: function(t)
+	loginComplete: function(t)
 	{
-		if (!t) return;
+		if (!t) return this.errorDialog('Unable to log you in!');
+		this.getAllFeeds();
+	},
+	
+	getAllFeeds: function()
+	{
 		this.manager.getAllFeedsList(this.getAllFeedsCallBack.bind(this));
 	},
 	
