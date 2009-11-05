@@ -5,7 +5,7 @@ ViewArticleAssistant = Class.create(Delicious.Assistant , {
 	nextArticle: false,
 	articleLink: false,
 	
-	
+	dragLocation: false,
 	lastDrag: false,
 	
 	initialize: function(o)
@@ -15,8 +15,10 @@ ViewArticleAssistant = Class.create(Delicious.Assistant , {
 		
 		this._loadFullImage = this.loadFullImage.bindAsEventListener(this);
 		this._anchorTap = this.anchorTap.bindAsEventListener(this);
+		this._onDragStart = this.onDragStart.bindAsEventListener(this);
 		this._onDragging = this.onDragging.bindAsEventListener(this);
 		this._onDragEnd = this.onDragEnd.bindAsEventListener(this);
+		this._onMouseUp = this.onMouseUp.bindAsEventListener(this);
 	},
 	
 	setup: function()
@@ -240,9 +242,10 @@ ViewArticleAssistant = Class.create(Delicious.Assistant , {
 		}
 		
 		var scroller = this.controller.getSceneScroller();
-		scroller.observe(Mojo.Event.dragStart , this._onDragging);
+		scroller.observe(Mojo.Event.dragStart , this._onDragStart);
 		scroller.observe(Mojo.Event.dragging , this._onDragging);
 		scroller.observe(Mojo.Event.dragEnd , this._onDragEnd);
+		scroller.observe('mouseup' , this._onMouseUp);
 	},
 	
 	removeAnchorFix: function()
@@ -259,29 +262,76 @@ ViewArticleAssistant = Class.create(Delicious.Assistant , {
 		}
 		
 		var scroller = this.controller.getSceneScroller();
-		scroller.stopObserving(Mojo.Event.dragStart , this._onDragging);
+		scroller.stopObserving(Mojo.Event.dragStart , this._onDragStart);
 		scroller.stopObserving(Mojo.Event.dragging , this._onDragging);
 		scroller.stopObserving(Mojo.Event.dragEnd , this._onDragEnd);
+		scroller.stopObserving('mouseup' , this._onMouseUp);
 	},
 	
-	anchorTap: function(event)
+	anchorTap: function(e)
 	{
 		if (this.lastDrag && this.lastDrag > Delicious.getTimeStamp()-1)
 		{
-			event.preventDefault();
-			event.stop();
+			e.preventDefault();
+			e.stop();
 			return false;
 		}
 	},
 	
-	onDragging: function(event)
+	onDragStart: function(e)
 	{
 		this.lastDrag = Delicious.getTimeStamp();
+		this.dragLocation = {start: {x:e.move.clientX , y:e.move.clientY , timeStamp: this.lastDrag}};
 	},
 	
-	onDragEnd: function(event)
+	onDragging: function(e)
+	{
+		
+		this.lastDrag = Delicious.getTimeStamp();
+		
+		if (this.dragLocation && this.dragLocation.start && Math.abs(e.move.clientY - this.dragLocation.start.y) > 90)
+		{
+			this.dragLocation = false;
+		}
+		else
+		{
+			this.dragLocation.last = {x:e.move.clientX , y:e.move.clientY , timeStamp: this.lastDrag};
+		}
+		
+	},
+	
+	onMouseUp: function(e)
+	{
+		if (!this.dragLocation || Math.abs(this.dragLocation.last.y - this.dragLocation.start.y) > 90)
+		{
+			this.dragLocation = false;
+			return;
+		}
+		
+		if (Math.abs(this.dragLocation.last.x - this.dragLocation.start.x) > 140 && (this.dragLocation.last.timeStamp-2) < this.dragLocation.start.timeStamp)
+		{
+			if ((this.dragLocation.last.x - this.dragLocation.start.x) > 0)
+			{
+				this.goToPreviousArticle();
+			}
+			else
+			{
+				
+				this.goToNextArticle();
+			}
+		}
+		else
+		{
+			this.dragLocation = false;
+		}
+	},
+	
+	onDragEnd: function(e)
 	{
 		this.lastDrag = Delicious.getTimeStamp();
+		
+		this.onMouseUp(e);
+		
 	}
 
 });

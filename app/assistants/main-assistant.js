@@ -63,6 +63,7 @@ MainAssistant = Class.create(Delicious.Assistant , {
 		else
 		{
 			this.countChanged();
+			this.refreshCounts();
 		}
 	},
 	
