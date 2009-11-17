@@ -1,14 +1,6 @@
 SupportAssistant = Class.create({
 	setup: function()
 	{
-		/* this function is for setup tasks that have to happen when the scene is first created */
-		
-		/* use Mojo.View.render to render view templates and add them to the scene, if needed. */
-		
-		/* setup widgets here */
-		
-		/* add event handlers to listen to events from widgets */
-		
 		this.controller.setupWidget(Mojo.Menu.appMenu , { omitDefaultItems: true } , { visible: false });
 		
 		this.controller.get( 'appname' ).innerHTML = Mojo.Controller.appInfo.title;
@@ -50,8 +42,6 @@ SupportAssistant = Class.create({
 	
 	handleListTap: function(event)
 	{
-		/* put in event handlers here that should only be in effect when this scene is active. For
-		   example, key handlers that are observing the document */
 		  if(event.item.type == 'web')
 		  {
 		  	this.controller.serviceRequest("palm://com.palm.applicationManager", {

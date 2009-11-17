@@ -17,13 +17,17 @@ AppAssistant = Class.create({
 	handleLaunch: function(o)
 	{
 		Mojo.Log.info('--appAssistant::handleLaunch timeStamp: ' , Delicious.getTimeStamp());
-		//if (Delicious.getTimeStamp() > 1257745187) return;
+		if (Delicious.getTimeStamp() > 1260593307) return;
 		var o = o || {};
 		if (o.checkForUpdates)
 		{
 			Mojo.Log.info('-----checkForUpdates');
 			var notify = new Feeds.Notifications();
 			notify.spawn();
+		}
+		else if (o.spawnBackup)
+		{
+			Feeds.StageManager.newDashboard('Backup' , 'Backup' , {});
 		}
 		else
 		{

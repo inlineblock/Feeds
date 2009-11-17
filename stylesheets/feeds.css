@@ -19,6 +19,10 @@
 	background: url(../images/refresh.png) no-repeat center center;
 	padding: 10px 0px 0px 5px;
 }
+body.offline .refresh_icon {
+	width:40px; 
+	background: url(../images/working_offline.png) no-repeat center center;
+}
 .folder_icon {
 	position:absolute;
 	left:10px;
@@ -36,6 +40,13 @@
 	width:32px; 
 	height:32px;
 	background: url(../images/small_loader.gif) no-repeat center center;
+	z-index: 1100;
+}
+.smallestLoader
+{
+	width:16px; 
+	height:16px;
+	background: url(../images/smallest_loader.gif) no-repeat center center;
 	z-index: 1100;
 }
 .list_scene {
@@ -139,6 +150,11 @@
 	padding: 10px 5px 0px 0px;
 	float:left;	
 }
+body.offline #markIcon
+{
+	display: none;
+}
+
 #markIcon:active
 {
 	opacity:0.3;
@@ -159,6 +175,10 @@
 #toggleIcon.unread
 {
 	background: url(../images/toggle_new.png) no-repeat center;
+}
+#toggleIcon.starred
+{
+	background: url(../images/toggle_starred.png) no-repeat center;
 }
 .feedItem
 {
@@ -229,7 +249,17 @@
 	text-align: center;
 	line-height: 29px;
 }
-
+.feedItem.starred .unreadCount
+{
+	background: transparent url(../images/starred.png) center center no-repeat;
+	width: 30px;
+	height: 30px;
+	border: none;
+}
+.feedItem.starred .unreadCount span
+{
+	display: none;
+}
 
 #overNightShade
 {
@@ -275,6 +305,10 @@ div.sectionHead
 	border-width: 2px 16px 2px 16px;
 }
 
+div.starred div#main-header div.palm-page-header-wrapper
+{
+	background: url(../images/small_star.png) 97% 12px no-repeat;
+}
 div#main-header.article 
 {
 	height: auto;
@@ -317,11 +351,20 @@ div#article img
 div#feedList .articleItem
 {
 	min-height: 40px;
+	
+}
+div#feedList .articleItem.starred .palm-row-wrapper
+{
+	background: transparent url('../images/small_star.png') 98% 4px no-repeat;
 }
 div#feedList .articleItem div.title
 {
 	font-size:.9em;
 	padding:4px 6px;
+}
+div#feedList .articleItem.starred div.title
+{
+	padding: 4px 26px 4px 6px;
 }
 div#feedList .articleItem.unread div.title
 {
@@ -339,6 +382,21 @@ div#feedList .articleItem div.feedTitle
 	width:98%;
 	color:#777;
 }
+div#feedList .articleItem .starred
+{
+	width:20px;
+	height:20px;
+	position: absolute;
+	top:3px;
+	right:3px;
+	
+	
+}
+div#feedList .articleItem.starred .starred
+{
+	display: block;
+}
+
 
 #loadMore
 {
@@ -352,4 +410,10 @@ div#feedList .articleItem div.feedTitle
 {
 	background: transparent url('../images/load_more.gif') center center no-repeat;
 	height:32px;
+}
+.dashboard-notification-module .smallestLoader
+{
+	position: absolute;
+	top:5px;
+	right: 5px;
 }

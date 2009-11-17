@@ -7,8 +7,8 @@ Feeds.GoogleFeed = Class.create({
 	categories: false,
 	sortid: false,
 	firstItemSecond: false,
-	unreadCount: false,
 	
+	unreadCount: false,
 	continuation: false,
 	
 	className: "",
@@ -30,7 +30,6 @@ Feeds.GoogleFeed = Class.create({
 	{
 		try
 		{
-			this.raw = o;
 			this.id = o.id || false;
 			this.title = o.title || false;
 			this.categories = o.categories || []; // array of categories
@@ -74,15 +73,16 @@ Feeds.GoogleFeed = Class.create({
 	
 	getArticles: function(callBack , getType)
 	{
+		Mojo.Log.info('----Feeds.GoogleFeed::getArticles');
 		getType = getType || 'all';
-		var callBack = callBack || Mojo.doNothing;
+		callBack = callBack || Mojo.doNothing;
 		var baseURL = "http://www.google.com/reader/api/0/stream/contents/" + escape(this.id);
 		var params = {method: 'get' , onSuccess: this.getArticlesSuccess.bind(this , callBack) , onFailure: this.getArticlesFailure.bind(this , callBack)};
 		params.parameters = {
 			n: Feeds.Preferences.getCount(),
 			ck: Delicious.getTimeStamp(),
 		}
-		
+		Mojo.Log.info('--------getArticles' , getType , this.title);
 		if (getType == 'unread')
 		{
 			params.parameters.xt = 'user/-/state/com.google/read';
@@ -94,13 +94,11 @@ Feeds.GoogleFeed = Class.create({
 	
 	getArticlesSuccess: function(callBack , t)
 	{
-		Mojo.Log.info('getArticlesSuccess' , t.status);
 		if (t.status != 200) return this.getArticlesFailure(callBack);
 		try
 		{
 			var info = t.responseText.evalJSON();
 			this.continuation = info.continuation;
-			Mojo.Log.info('continuation: ' , this.continuation);
 			for (var i=0; i < info.items.length; i++)
 			{
 				var article = new Feeds.GoogleArticle(this);
@@ -118,6 +116,37 @@ Feeds.GoogleFeed = Class.create({
 	},
 	
 	getArticlesFailure: function(callBack , t)
+	{
+		callBack(false);
+	},
+	
+	getOfflineArticles: function(callBack)
+	{
+		Mojo.Log.info('-----------getOfflineArticles');
+		this.manager.getDepot().get(this.id , this.getOfflineArticlesSuccess.bind(this , callBack) , this.getOfflineArticlesFailure.bind(this , callBack));
+	},
+	
+	getOfflineArticlesSuccess: function(callBack , articles)
+	{
+		if (!articles.length) return this.getOfflineArticlesFailure(callBack);
+		
+		try
+		{
+			for (var i=0; i < articles.length; i++)
+			{
+				var article = new Feeds.GoogleArticle(this);
+				article.load(articles[i]);
+				this.articles.push(article);
+			}
+			callBack(true);
+		}
+		catch(e)
+		{
+			return this.getOfflineArticlesFailure(callBack);
+		}
+	},
+	
+	getOfflineArticlesFailure: function(callBack)
 	{
 		callBack(false);
 	},
@@ -145,7 +174,6 @@ Feeds.GoogleFeed = Class.create({
 	
 	refreshArticlesSuccess: function(callBack , t)
 	{
-		Mojo.Log.info('refreshArticlesSuccess' , t.status);
 		if (t.status != 200) return this.refreshArticlesFailure(callBack);
 		try
 		{
@@ -196,13 +224,11 @@ Feeds.GoogleFeed = Class.create({
 	
 	loadMoreArticlesSuccess: function(callBack , t)
 	{
-		Mojo.Log.info('refreshArticlesSuccess' , t.status);
 		if (t.status != 200) return this.loadMoreArticlesFailure(callBack);
 		try
 		{
 			var info = t.responseText.evalJSON();
 			this.continuation = info.continuation;
-			Mojo.Log.info('continuation: ' , this.continuation);
 			for (var i=0; i < info.items.length; i++)
 			{
 				var article = new Feeds.GoogleArticle(this);
@@ -253,7 +279,6 @@ Feeds.GoogleFeed = Class.create({
 	markAllAsReadSuccess: function(callBack , t)
 	{
 		callBack = callBack || Mojo.doNothing;
-		Mojo.Log.info('markAllAsReadSuccess' , t.status);
 		if (t.status != 200) return this.markAllAsReadFailure(callBack);
 		for (var i=0; i < this.articles.length; i++)
 		{
@@ -279,9 +304,9 @@ Feeds.GoogleFeed = Class.create({
 			return this.articles.push(article);
 		}
 		
-		var aid = article.published;
-		var fid = this.articles[0].published;
-		var lid = this.articles[this.articles.length - 1].published;
+		var aid = article.published,
+			fid = this.articles[0].published,
+			lid = this.articles[this.articles.length - 1].published;
 		if (aid > fid)
 		{
 			this.articles.unshift(article);
@@ -318,6 +343,33 @@ Feeds.GoogleFeed = Class.create({
 		{
 			this.ajaxRequest.transport.abort();
 		}
+	},
+	
+	prepareForDatabase: function()
+	{
+		return {id: this.id , title: this.title , categories: this.categories , sortid: this.sortid , firstitemsec: this.firstItemSecond , unreadcount: this.unreadCount , type: this.type , className: this.className};
+	},
+	
+	
+	addArticlesToDepot: function(callBack)
+	{
+		callBack = callBack || Mojo.doNothing;
+		var store = [];
+		this.articles.each(function(a){ store.push(a.prepareForDatabase()); });
+		this.manager.getDepot().add(this.id , store , this.addArticlesToDepotSuccess.bind(this , callBack) , this.addArticlesToDepotFailure.bind(this , callBack));
+	},
+	
+	addArticlesToDepotSuccess: function(callBack)
+	{
+		callBack = callBack || Mojo.doNothing;
+		callBack(true);
+	},
+	
+	addArticlesToDepotFailure: function(callBack , e)
+	{
+		Mojo.Log.info('-----------addArticlesToDepotFailure' , e);
+		callBack = callBack || Mojo.doNothing;
+		callBack(false);
 	}
 	
 });

@@ -28,10 +28,8 @@ NotificationAssistant = Class.create({
 	
 	onTap: function()
 	{
-		
 		Feeds.StageManager.newCard('main' , 'main' , {manager: this.manager , fullRefresh: true});
-		Feeds.StageManager.close('notification');
-		
+		Feeds.Notifications.close();
 	}
 
 });

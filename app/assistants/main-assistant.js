@@ -35,8 +35,20 @@ MainAssistant = Class.create(Delicious.Assistant , {
 		
 		
 		var appMenu = this.getAppMenu();
-		appMenu.push({label: $L('Mark All As Read') , command: "markAllAsRead"});
-		appMenu.push({label: $L('Add New Feed') , command: 'addNewFeed'});
+		if (!this.isOffline())
+		{
+			this.controller.getSceneScroller().up('body').addClassName('online').removeClassName('offline');
+			appMenu.push({label: $L('Mark All As Read') , command: "markAllAsRead"});
+			appMenu.push({label: $L("Enable Offline Mode") , command: "goOffline"});
+			appMenu.push({label: $L('Backup For Offline Mode') , command: "backupArticles"});
+		}
+		else
+		{
+			this.controller.getSceneScroller().up('body').addClassName('offline').removeClassName('online');
+			appMenu.push({label: $L("Disable Offline Mode") , command: "goOnline"});
+		}
+		
+		//appMenu.push({label: $L('Add New Feed') , command: 'addNewFeed'});
 		this.controller.setupWidget(Mojo.Menu.appMenu , {} , {visible: true , items: appMenu});
 		
 		Mojo.Event.listen(this.controller.stageController.document , Mojo.Event.stageDeactivate, this.deactivateWindow.bindAsEventListener(this));
@@ -49,9 +61,18 @@ MainAssistant = Class.create(Delicious.Assistant , {
 			this.showLoader();
 			if (Feeds.GoogleAccount.isLoggedIn())
 			{
-				this.manager = Feeds.GoogleAccount.getManager();
-				var loginInfo = Feeds.GoogleAccount.getLogin();
-				this.manager.login(loginInfo.email , loginInfo.password , this.loginComplete.bind(this));
+				if (this.isOffline())
+				{
+					this.manager = Feeds.GoogleAccount.getManager();
+					this.manager.getFeedsFromDepot(this.getOfflineFeedsCallBack.bind(this));
+				}
+				else
+				{
+					this.manager = Feeds.GoogleAccount.getManager();
+					var loginInfo = Feeds.GoogleAccount.getLogin();
+					this.manager.login(loginInfo.email , loginInfo.password , this.loginComplete.bind(this));
+				}
+				
 			}
 			else
 			{
@@ -85,12 +106,12 @@ MainAssistant = Class.create(Delicious.Assistant , {
 		}
 		
 		
-		if (o.refresh)
+		if (o.refresh && !this.isOffline())
 		{
 			this.refreshList();
 		}
 		
-		if (o.refreshCounts)
+		if (o.refreshCounts && !this.isOffline())
 		{
 			this.refreshCounts();
 		}
@@ -146,6 +167,10 @@ MainAssistant = Class.create(Delicious.Assistant , {
 				case "addNewFeed":
 					this.addNewFeed();
 				break;
+				
+				case 'backupArticles':
+					return window.setTimeout(this.backupForOffline.bind(this) , 400);
+				break;
 			}
 		}
 		this.doHandleCommand(event);
@@ -191,7 +216,7 @@ MainAssistant = Class.create(Delicious.Assistant , {
 	
 	refreshCounts: function(e)
 	{
-		if (this._isRefreshing) return;
+		if (this._isRefreshing || this.isOffline()) return;
 		
 		if (Feeds.GoogleAccount.isLoggedIn() && this.manager.display.length === 0)
 		{
@@ -264,6 +289,19 @@ MainAssistant = Class.create(Delicious.Assistant , {
 		this.manager.getAllFeedsList(this.getAllFeedsCallBack.bind(this));
 	},
 	
+	getOfflineFeedsCallBack: function(success)
+	{
+		if (success)
+		{
+			this.countChanged();
+		}
+		else
+		{
+			this.errorDialog("Unable to offline load feeds from database.");
+		}
+		this.hideLoader();
+	},
+	
 	getAllFeedsCallBack: function(success)
 	{
 		if (success)
@@ -285,7 +323,7 @@ MainAssistant = Class.create(Delicious.Assistant , {
 		if (this._isRefreshing) return;
 		
 		this.showSmallLoader();
-		this._isRefreshing = true
+		this._isRefreshing = true;
 	},
 	
 	markAllAsReadCallBack: function(finished)
@@ -311,6 +349,12 @@ MainAssistant = Class.create(Delicious.Assistant , {
 			this.errorDialog('Unable to delete feed from Google Reader.');
 		}
 		this.countChanged();
+	},
+	
+	backupForOffline: function()
+	{
+		Mojo.Log.info('---------backupForOffline');
+		Mojo.Controller.getAppController().launch(Mojo.Controller.appInfo.id , {spawnBackup:true});
 	},
 	
 	showSmallLoader: function()
@@ -340,6 +384,20 @@ MainAssistant = Class.create(Delicious.Assistant , {
 		{
 			appIcon.show();
 		}
+	},
+	
+	goOffline: function()
+	{
+		this.manager.goOffline();
+		window.browseOffline = true;
+		this.controller.stageController.swapScene({name: 'main' , transition: Mojo.Transition.crossFade});
+	},
+	
+	goOnline: function()
+	{
+		this.manager.goOnline();
+		window.browseOffline = false;
+		this.controller.stageController.swapScene({name: 'main' , transition: Mojo.Transition.crossFade});
 	}
 	
 	

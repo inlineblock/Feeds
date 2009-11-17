@@ -12,12 +12,20 @@ Feeds.GoogleManager  = Class.create({
 	
 	allItemsFeed: false,
 	
+	depot: false,
+	depotReady:false,
+	depotError: false,
+	
+	allFeedsKey: 'Feeds::allFeeds',
+	
 	initialize: function()
 	{
+		this.offlineMode = false;
 		this.sidHandler = new Mojo.Model.Cookie('google-auth-SID');
 		this.feeds = [];
 		this.display = [];
 		this.folders = {};
+		this.initializeDepot();
 	},
 	
 	getRequestHeaders: function()
@@ -71,6 +79,9 @@ Feeds.GoogleManager  = Class.create({
 	
 	getAllFeedsList: function(callBack)
 	{
+		this.resetAllFeeds();
+		if (this.offlineMode) return this.getFeedsFromDepot(callBack);
+		
 		if (!this.SID) return this.login(this.email , this.password , this.getFeedsList.bind(this));
 		var callBack = callBack || Mojo.doNothing;
 		var params = {method: 'get' , onSuccess: this.getFeedsSuccess.bind(this , callBack) , onFailure: this.getFeedsFailure.bind(this , callBack)};
@@ -86,6 +97,7 @@ Feeds.GoogleManager  = Class.create({
 		try
 		{
 			this.setupAllItemsFeed();
+			this.setupStarredItemsFeed();
 			var feeds = t.responseText.evalJSON().subscriptions;
 			for(var i=0; i < feeds.length; i++)
 			{
@@ -95,10 +107,11 @@ Feeds.GoogleManager  = Class.create({
 				this.addFeedToCategories(feed);
 			}
 			callBack(true);
+			window.setTimeout(this.addFeedsToDepot.bind(this) , 50);
 		}
 		catch(e)
 		{
-			Mojo.Log.error('+++++++getFeedsSuccess' , Object.toJSON(e));
+			Mojo.Log.error('+++++++getFeedsSuccessError' , Object.toJSON(e));
 			this.getFeedsFailure(callBack);
 		}
 	},
@@ -112,6 +125,9 @@ Feeds.GoogleManager  = Class.create({
 	updateUnreadCount: function(callBack)
 	{
 		callBack = callBack || Mojo.doNothing;
+		
+		if (this.offlineMode) return window.setTimeout(callBack.bind({} , true) , 20);
+		
 		var params = {method: 'get' , onSuccess: this.updateUnreadCountSuccess.bind(this , callBack) , onFailure: this.updateUnreadCountFailure.bind(this , callBack)};
 		//http://www.google.com/reader/api/0/unread-count?allcomments=true&output=json&ck=1252818277109&client=scroll&hl=en
 		params.parameters = { allcomments: 'true' , output: 'json' , ck: Delicious.getTimeStamp() , client: "PalmPre" };
@@ -142,10 +158,11 @@ Feeds.GoogleManager  = Class.create({
 				}
 			}
 			callBack(true);
+			window.setTimeout(this.addFeedsToDepot.bind(this) , 50);
 		}
 		catch(e)
 		{
-			Mojo.Log.error(Object.toJSON(e));
+			Mojo.Log.error('------updateUnreadCountSuccessError' , Object.toJSON(e));
 			return this.updateUnreadCountFailure(callBack);
 		}
 		
@@ -163,7 +180,6 @@ Feeds.GoogleManager  = Class.create({
 		if (!payload || !payload.SID || !payload.timeStamp) return false;
 		if (payload.timeStamp - 1209600 > Delicious.getTimeStamp()) return false;
 		
-		//Mojo.Log.info('PullingSID: ' , payload.SID);
 		this.setSID(payload.SID);
 		return true;
 	},
@@ -234,8 +250,9 @@ Feeds.GoogleManager  = Class.create({
 		callBack(-1);
 	},
 	
-	addFeedToCategories: function(feed)
+	addFeedToCategories: function(feed , offlineMode)
 	{
+		offlineMode = offlineMode || false;
 		try
 		{
 			var categories = feed.categories;
@@ -256,7 +273,7 @@ Feeds.GoogleManager  = Class.create({
 					}
 					else
 					{
-						this.folders[cat.id] = new Feeds.GoogleFolder(this , cat);
+						this.folders[cat.id] = new Feeds.GoogleFolder(this , cat , offlineMode);
 						this.folders[cat.id].addFeed(feed);
 						this.display.push(this.folders[cat.id]);
 					}
@@ -296,6 +313,16 @@ Feeds.GoogleManager  = Class.create({
 			this.allItemsFeed = new Feeds.GooglePsuedoFeed(this);
 			this.allItemsFeed.load({});
 			this.display.push(this.allItemsFeed);
+		}
+	},
+	
+	setupStarredItemsFeed: function()
+	{
+		if (this.display.length <= 1)
+		{
+			this.starredFeed = new Feeds.GooglePsuedoFeed(this);
+			this.starredFeed.load({title: 'Starred items' , id: 'user/-/state/com.google/starred' , className: 'starred'});
+			this.display.push(this.starredFeed);
 		}
 	},
 	
@@ -484,12 +511,169 @@ Feeds.GoogleManager  = Class.create({
 		catch(e){}
 	},
 	
+	resetAllFeeds: function()
+	{
+		Mojo.Log.info('-----------resetAllFeeds');
+		this.allItemsFeed = false;
+		this.feeds = [];
+		this.display = [];
+		this.folders = {};
+	},
+	
 	abortRequests: function()
 	{
 		if (this.ajaxRequest && this.ajaxRequest.transport && this.ajaxRequest.transport.abort)
 		{
 			this.ajaxRequest.transport.abort();
 		}
+	},
+	
+	
+	addFeedsToDepot: function(callBack , count)
+	{
+		try
+		{
+			callBack = callBack || Mojo.doNothing;
+			count = count || 1;
+			if (this.depotError || count > 5) return false;
+			if (!this.depotReady) window.setTimeout(this.addFeedsToDepot.bind(this , callBack , count+1) , 500);
+			
+			var store = [];
+			if (this.starredFeed && this.starredFeed.prepareForDatabase)
+			{
+				store.push(this.starredFeed.prepareForDatabase());
+			}
+			for (var i=0; i < this.feeds.length; i++)
+			{
+				var feed = this.feeds[i];
+				if (feed.type == 'feed')
+				{
+					store.push(feed.prepareForDatabase()); 
+				}
+			}
+			
+			this.depot.add(this.allFeedsKey , store , this.addFeedsToDepotSuccess.bind(this , callBack) , this.addFeedsToDepotFailure.bind(this , callBack));
+		}
+		catch(e)
+		{
+			Mojo.Log.info('-----addFeedsToDepot::error---' , Object.toJSON(e));
+			window.setTimeout(function(){callBack(false)} , 50);
+		}
+	},
+	
+	addFeedsToDepotSuccess: function(callBack)
+	{
+		Mojo.Log.info('-----------addFeedsToDepotSuccess');
+		callBack = callBack || Mojo.doNothing;
+		callBack(true);
+	},
+	
+	addFeedsToDepotFailure: function(callBack , error)
+	{
+		Mojo.Log.info('-----------addFeedsToDepotFailure' , error);
+		callBack = callBack || Mojo.doNothing;
+		callBack(false);
+	},
+	
+	getFeedsFromDepot: function(callBack , count)
+	{
+		callBack = callBack || Mojo.doNothing;
+		count = count || 1;
+		if (this.depotError || count > 5) return callBack(false);
+		if (!this.depotReady) window.setTimeout(this.getFeedsFromDepot.bind(this , callBack , count+1) , 500);
+		
+		this.depot.get(this.allFeedsKey , this.getFeedsFromDepotSuccess.bind(this , callBack) , this.getFeedsFromDepotFailure.bind(this , callBack));
+	},
+	
+	getFeedsFromDepotSuccess: function(callBack , feeds)
+	{
+		Mojo.Log.info('---------getFeedsFromDepotSuccess' , feeds.length);
+		if (!feeds.length) return this.getFeedsFromDepotFailure(callBack);
+		if (this.feeds.length) return;
+		try
+		{
+			for(var i=0; i < feeds.length; i++)
+			{
+				if (feeds[i].type == 'psuedoFeed')
+				{
+					var feed = new Feeds.GooglePsuedoFeed(this);
+				}
+				else
+				{
+					var feed = new Feeds.GoogleFeed(this);
+				}
+				feed.load(feeds[i]);
+				this.feeds.push(feed);
+				this.addFeedToCategories(feed , true);
+			}
+			callBack(true);
+			return;
+		}
+		catch(e)
+		{
+			Mojo.Log.error('+++++++getFeedsFromDepot-ERROR' , Object.toJSON(e));
+			return this.getFeedsFromDepotFailure(callBack);
+		}
+		
+	},
+	
+	getFeedsFromDepotFailure: function(callBack)
+	{
+		Mojo.Log.info('---------getFeedsFromDepotFailure');
+		callBack = callBack || Mojo.doNothing;
+		return callBack(false);
+	},
+	
+	addAllArticlesToDepot: function(callBack)
+	{
+		if (!this.feeds || !this.feeds.length) return window.setTimeout(function(){callBack(false);} , 50);
+	},
+	
+	goOffline: function()
+	{
+		Mojo.Log.info('googleManager::goOffline');
+		this.offlineMode = true;
+		this.resetAllFeeds();
+	},
+	
+	goOnline: function()
+	{
+		Mojo.Log.info('googleManager::goOnline');
+		this.offlineMode = false;
+		this.resetAllFeeds();
+	},
+	
+	
+	
+	
+	/// DEPOT INFO
+	initializeDepot: function()
+	{
+		if (!this.depot)
+		{
+			Mojo.Log.info('++++++++++initializeDepot');
+			this.depot = new Mojo.Depot({name: 'ext:FeedsGoogleManager' , estimatedSize:100000000} , this.initializeDepotSuccess.bind(this), this.initializeDepotFailure.bind(this));
+		}	
+	},
+	
+	initializeDepotSuccess: function()
+	{
+		Mojo.Log.info('++++++++++initializeDepotSuccess');
+		this.depotReady = true;
+		this.depotError = false;
+	},
+	
+	initializeDepotFailure: function(e)
+	{
+		Mojo.Log.info('++++++++++initializeDepotFailure' , e);
+		this.depotReady = false;
+		this.depotError = true;
+	},
+	
+	getDepot: function()
+	{
+		return this.depot;
 	}
+	
 
 });

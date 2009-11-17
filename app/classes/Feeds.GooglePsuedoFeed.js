@@ -11,6 +11,7 @@ Feeds.GooglePsuedoFeed = Class.create(Feeds.GoogleFeed , {
 			this.sortid = 1;
 			this.firstItemSecond = o.firstitemsec || 0;
 			this.unreadCount = o.unreadcount || 0;
+			this.className = o.className;
 		}
 		catch(e)
 		{
@@ -33,13 +34,20 @@ Feeds.GooglePsuedoFeed = Class.create(Feeds.GoogleFeed , {
 	
 	setupClasses: function() // FOR TEMPLATING
 	{
-		this.className = "psuedo";
+		this.className += " psuedo";
 		
 		if (this.unreadCount)
 		{
 			this.className += " hasCount";
 		}
 		this.className = this.className.trim();
+	},
+	
+	getArticles: function($super , callBack , getType)
+	{
+		Mojo.Log.info('----Feeds.GooglePsuedoFeed::getArticles');
+		this.articles = [];
+		$super(callBack , getType);
 	},
 	
 	markAllAsRead: function(callBack)
@@ -75,6 +83,15 @@ Feeds.GooglePsuedoFeed = Class.create(Feeds.GoogleFeed , {
 			}
 		}
 		this.setUnreadCount(0);
+	},
+	
+	fitArticle: function($super , article)
+	{
+		for (var i=0; i < this.articles.length; i++)
+		{
+			if (this.articles[i].published == article.published && this.articles[i].title == article.title) return;
+		}
+		return $super(article);
 	}
 
 });

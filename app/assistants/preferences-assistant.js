@@ -24,6 +24,14 @@ PreferencesAssistant = Class.create(Delicious.Assistant , {
 		
 		var landscape = Feeds.Preferences.getLandscapeSettings();
 		this.landscapeModeModel = {value: landscape.enabled};
+		if (landscape.enabled)
+		{
+			this.activateLandscape();
+		}
+		else
+		{
+			this.deactivateLandscape();
+		}
 		this.controller.setupWidget('landscapeModeToggle' , { trueValue: true , falseValue: false } , this.landscapeModeModel);
 		this.scrollGesturesModel = {value: landscape.gestures};
 		this.controller.setupWidget('scrollGesturesToggle' , { trueValue: true , falseValue: false } , this.scrollGesturesModel);
@@ -32,6 +40,14 @@ PreferencesAssistant = Class.create(Delicious.Assistant , {
 		
 		var notify = Feeds.Preferences.getNotificationSettings();
 		this.notificationsEnabledModel = {value: notify.enabled};
+		if (notify.enabled)
+		{
+			this.activateNotifications();
+		}
+		else
+		{
+			this.deactivateNotifications();
+		}
 		this.controller.setupWidget('enableNotificationsToggle' , { trueValue: true , falseValue: false } , this.notificationsEnabledModel);
 		this.notificationsIntervalModel = {value: notify.interval};
 		this.controller.setupWidget("notificationInterval", {label: $L('Check Interval') , choices: [{label: $L('15 Minutes') , value: 15} , {label: $L('30 Minutes') , value: 30} , {label: $L('1 Hour') , value: 60} , {label: $L('2 Hours') , value: 120} , {label: $L('6 Hours') , value: 360}]} , this.notificationsIntervalModel);
@@ -125,12 +141,31 @@ PreferencesAssistant = Class.create(Delicious.Assistant , {
 	{
 		var settings = {enabled: this.landscapeModeModel.value , gestures: this.scrollGesturesModel.value};
 		Feeds.Preferences.setLandscapeSettings(settings);
+		
+		if (settings.enabled)
+		{
+			this.activateLandscape();
+		}
+		else
+		{
+			this.deactivateLandscape();
+		}
 	},
 	
 	notificationsChange: function()
 	{
 		var settings = {enabled: this.notificationsEnabledModel.value , interval: this.notificationsIntervalModel.value};
 		Feeds.Preferences.setNotificationSettings(settings);
+		
+		
+		if (settings.enabled)
+		{
+			this.activateNotifications();
+		}
+		else
+		{
+			this.deactivateNotifications();
+		}
 		
 		if (settings.enabled)
 		{
@@ -151,6 +186,30 @@ PreferencesAssistant = Class.create(Delicious.Assistant , {
 	handleCommand: function()
 	{
 		
+	},
+	
+	activateLandscape: function()
+	{
+		this.controller.get('landscapeFirst').removeClassName('last');
+		this.controller.get('landscapeLast').addClassName('last').show();
+	},
+	
+	deactivateLandscape: function()
+	{
+		this.controller.get('landscapeFirst').addClassName('last');
+		this.controller.get('landscapeLast').removeClassName('last').hide();
+	},
+	
+	activateNotifications: function()
+	{
+		this.controller.get('notificationsFirst').removeClassName('last');
+		this.controller.get('notificationsLast').addClassName('last').show();
+	},
+	
+	deactivateNotifications: function()
+	{
+		this.controller.get('notificationsFirst').addClassName('last');
+		this.controller.get('notificationsLast').removeClassName('last').hide();
 	}
 
 });

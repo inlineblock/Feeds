@@ -61,5 +61,9 @@
     {
         "scenes": "Notification",
         "source": "app/assistants/Notification-assistant.js"
+    },
+    {
+        "scenes": "Backup",
+        "source": "app/assistants/Backup-assistant.js"
     }
 ]

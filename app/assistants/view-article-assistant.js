@@ -31,12 +31,17 @@ ViewArticleAssistant = Class.create(Delicious.Assistant , {
 			this.controller.useLandscapePageUpDown(true);
 		}
 		
-		var insertHere = this.controller.get('insertHere');
-		insertHere.innerHTML = Mojo.View.render({object: this.article , template: this.getArticleTemplate()});
+		this.renderArticle();
 		
 		var commandMenu = this.getCommandMenu();
 		this.controller.setupWidget(Mojo.Menu.commandMenu , {menuClass: 'no-fade'} , {items: commandMenu});
-		
+	},
+	
+	renderArticle: function()
+	{
+		var insertHere = this.controller.get('insertHere');
+		insertHere.innerHTML = Mojo.View.render({object: this.article , template: this.getArticleTemplate()});
+		insertHere.className = this.article.className;
 		this.addAnchorFix();
 		this.attachLoadImage();
 	},
@@ -99,6 +104,11 @@ ViewArticleAssistant = Class.create(Delicious.Assistant , {
 				case "articleLink":
 					return this.goToArticleLink();
 				break;
+				
+				case "star":
+					Mojo.Log.info('--handleCommand::star');
+					return this.checkStarArticle();
+				break;
 			}
 		}
 	},
@@ -116,6 +126,8 @@ ViewArticleAssistant = Class.create(Delicious.Assistant , {
 		{
 			commandMenu.push({});
 		}
+		
+		commandMenu.push({ iconPath: 'images/starItem.png' , command: 'star'});
 		
 		if (this.articleLink)
 		{
@@ -289,7 +301,7 @@ ViewArticleAssistant = Class.create(Delicious.Assistant , {
 		
 		this.lastDrag = Delicious.getTimeStamp();
 		
-		if (this.dragLocation && this.dragLocation.start && Math.abs(e.move.clientY - this.dragLocation.start.y) > 90)
+		if (this.dragLocation && this.dragLocation.start && Math.abs(e.move.clientY - this.dragLocation.start.y) > 80)
 		{
 			this.dragLocation = false;
 		}
@@ -302,13 +314,13 @@ ViewArticleAssistant = Class.create(Delicious.Assistant , {
 	
 	onMouseUp: function(e)
 	{
-		if (!this.dragLocation || Math.abs(this.dragLocation.last.y - this.dragLocation.start.y) > 90)
+		if (!this.dragLocation || Math.abs(this.dragLocation.last.y - this.dragLocation.start.y) > 80)
 		{
 			this.dragLocation = false;
 			return;
 		}
 		
-		if (Math.abs(this.dragLocation.last.x - this.dragLocation.start.x) > 140 && (this.dragLocation.last.timeStamp-2) < this.dragLocation.start.timeStamp)
+		if (Math.abs(this.dragLocation.last.x - this.dragLocation.start.x) > 120 && (this.dragLocation.last.timeStamp-2) < this.dragLocation.start.timeStamp)
 		{
 			if ((this.dragLocation.last.x - this.dragLocation.start.x) > 0)
 			{
@@ -331,7 +343,47 @@ ViewArticleAssistant = Class.create(Delicious.Assistant , {
 		this.lastDrag = Delicious.getTimeStamp();
 		
 		this.onMouseUp(e);
-		
+	},
+	
+	checkStarArticle: function()
+	{
+		this.showLoader();
+		if (this.article.isStarred())
+		{
+			Mojo.Log.info('--checkStarArticle::unmarkAsStarred');
+			this.questionDialog('Remove Star' , "Are you sure you'd like to unstar this article?" , 'Yes, unstar it.' , 'negative', 'cancel' , '' , this.removeStarConfirm.bind(this))
+		}
+		else
+		{
+			Mojo.Log.info('--checkStarArticle::markAsStarred');
+			this.article.markAsStarred(this.addStarCallBack.bind(this));
+		}
+	},
+	
+	removeStarConfirm: function(remove)
+	{
+		if (remove)
+		{
+			this.article.unmarkAsStarred(this.removeStarCallBack.bind(this));
+		}
+		else
+		{
+			this.hideLoader();
+		}
+	},
+	
+	addStarCallBack: function(success)
+	{
+		Mojo.Log.info('--addStarCallBack::' , success);
+		this.hideLoader();
+		this.renderArticle();
+	},
+	
+	removeStarCallBack: function(success)
+	{
+		Mojo.Log.info('--removeStarCallBack::' , success);
+		this.hideLoader();
+		this.renderArticle();
 	}
 
 });

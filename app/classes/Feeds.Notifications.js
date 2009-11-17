@@ -7,15 +7,12 @@ Feeds.Notifications = Class.create({
 	
 	spawn: function()
 	{
-		Mojo.Log.info('----Feeds.Notifications::spawn');
 		var notify = Feeds.Preferences.getNotificationSettings();
 		if (!notify.enabled) return false;
 		Feeds.Notifications.enable();
-		Mojo.Log.info('----Feeds.Notifications::spawn2');
 		if (!Feeds.GoogleAccount.isLoggedIn()) return false;
 		var loginInfo = Feeds.GoogleAccount.getLogin();
 		this.manager.login(loginInfo.email , loginInfo.password , this.loginComplete.bind(this));
-		Mojo.Log.info('----Feeds.Notifications::spawn3');
 	},
 	
 	loginComplete: function(t)
@@ -45,6 +42,11 @@ Feeds.Notifications = Class.create({
 		if (Feeds.StageManager.stageExists(Feeds.Notifications.stageName))
 		{
 			Feeds.StageManager.close(Feeds.Notifications.stageName);
+		}
+		var offline = Feeds.Preferences.getOfflineSettings();
+		if (offline.fetchOnNotifications)
+		{
+			Mojo.Controller.getAppController().launch(Mojo.Controller.appInfo.id , {spawnBackup:true});
 		}
 		
 		if (num <= 0) return false;
@@ -99,4 +101,12 @@ Feeds.Notifications.disable = function()
 			method: "clear",
 			parameters: { 'key': Feeds.Notifications.alarmKey }
 	});
+}
+
+Feeds.Notifications.close = function()
+{
+	if (Feeds.StageManager.stageExists(Feeds.Notifications.stageName))
+	{
+		Feeds.StageManager.close(Feeds.Notifications.stageName);
+	}
 }

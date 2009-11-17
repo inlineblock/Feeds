@@ -30,7 +30,6 @@ Feeds.GoogleArticle = Class.create({
 		var o = o || {};
 		try
 		{
-			this.raw = o;
 			this.id = o.id;
 			this.title = o.title;
 			this.updated = o.updated;
@@ -84,16 +83,28 @@ Feeds.GoogleArticle = Class.create({
 		{
 			this.className += " unread";
 		}
+		
+		if (this.isStarred())
+		{
+			this.className += " starred"
+		}
 		this.className = this.className.trim();
 	},
 	
-	removeUnreadClassName: function()
+	addClassName: function(className)
 	{
-		this.className = this.className.replace('unread' , '').trim();
+		this.className += " " + className;
+		this.className = this.className.trim();
+	},
+	
+	removeClassName: function(className)
+	{
+		this.className = this.className.replace(className , '').trim();
 	},
 	
 	hasBeenRead: function()
 	{
+		
 		if (this.categories.length)
 		{
 			for(var i=0; i < this.categories.length; i++)
@@ -103,6 +114,21 @@ Feeds.GoogleArticle = Class.create({
 				{
 					return true;
 				}
+			}
+		}
+		return false;
+	},
+	
+	isStarred: function()
+	{
+		if (this.className.indexOf('starred') != -1) return true;
+		
+		if (this.categories.length)
+		{
+			for(var i=0; i < this.categories.length; i++)
+			{
+				var cat = this.categories[i];
+				if (cat.indexOf("state/com.google/starred") != -1) return true;
 			}
 		}
 		return false;
@@ -134,10 +160,78 @@ Feeds.GoogleArticle = Class.create({
 		{
 			this.decrementFeedUnreadCount();
 		}
-		callBack(worked);
+		callBack(true);
 	},
 	
 	markAsReadFailure: function(callBack , t)
+	{
+		callBack = callBack || Mojo.doNothing;
+		callBack(false);
+	},
+	
+	markAsStarred: function(callBack , token)
+	{
+		callBack = callBack || Mojo.doNothing;
+		
+		var token = token || false;
+		if (token === -1) return callBack(false);
+		if (!token)
+		{
+			this.feed.manager.getEditToken(this.markAsStarred.bind(this , callBack));
+			return;
+		}
+		var params = {method:'post' ,  onSuccess: this.markAsStarredSuccess.bind(this , callBack) , onFailure: this.markAsStarredFailure.bind(this , callBack)};
+		params.requestHeaders = this.feed.manager.getRequestHeaders();
+		params.parameters = {'T':token , a: this.getStarredTag() , async: 'true' , i: this.id , s:this.feed.id};
+		Mojo.Log.info('---paramsMarkAsStarred' , Object.toJSON(params.parameters));
+		this.ajaxRequest = new Ajax.Request('http://www.google.com/reader/api/0/edit-tag?client=PalmPre' , params);
+	},
+	
+	markAsStarredSuccess: function(callBack , t)
+	{
+		callBack = callBack || Mojo.doNothing;
+		if (t.status == 200)
+		{
+			this.addClassName('starred');
+		}
+		callBack(true);
+	},
+	
+	markAsStarredFailure: function(callBack , t)
+	{
+		callBack = callBack || Mojo.doNothing;
+		callBack(false);
+	},
+	
+	
+	unmarkAsStarred: function(callBack , token)
+	{
+		callBack = callBack || Mojo.doNothing;
+		
+		var token = token || false;
+		if (token === -1) return callBack(false);
+		if (!token)
+		{
+			this.feed.manager.getEditToken(this.unmarkAsStarred.bind(this , callBack));
+			return;
+		}
+		var params = {method:'post' ,  onSuccess: this.unmarkAsStarredSuccess.bind(this , callBack) , onFailure: this.unmarkAsStarredFailure.bind(this , callBack)};
+		params.requestHeaders = this.feed.manager.getRequestHeaders();
+		params.parameters = {'T':token , r: this.getStarredTag() , async: 'true' , i: this.id , s:this.feed.id}; 
+		this.ajaxRequest = new Ajax.Request('http://www.google.com/reader/api/0/edit-tag?client=PalmPre' , params);
+	},
+	
+	unmarkAsStarredSuccess: function(callBack , t)
+	{
+		callBack = callBack || Mojo.doNothing;
+		if (t.status == 200)
+		{
+			this.removeClassName('starred');
+		}
+		callBack(true);
+	},
+	
+	unmarkAsStarredFailure: function(callBack , t)
 	{
 		callBack = callBack || Mojo.doNothing;
 		callBack(false);
@@ -147,18 +241,18 @@ Feeds.GoogleArticle = Class.create({
 	{
 		this.feed.unreadCount--;
 		this.categories.push(this.getUnreadTag());
-		this.removeUnreadClassName();
+		this.removeClassName('unread');
 	},
 	
 	getUnreadTag: function()
 	{
 		return 'user/-/state/com.google/read';
-		if (!this.categories) return 'read';
-		var baseTag = this.categories[0];
-		var parts = baseTag.split('/');
-		var forget = parts.pop();
-		parts.push('read');
-		return parts.join('/');
+		
+	},
+	
+	getStarredTag: function()
+	{
+		return 'user/-/state/com.google/starred';
 	},
 	
 	getPreviousArticle: function()
@@ -196,6 +290,21 @@ Feeds.GoogleArticle = Class.create({
 		{
 			this.ajaxRequest.transport.abort();
 		}
+	},
+	
+	prepareForDatabase: function()
+	{
+		return {
+					id: this.id,
+					title: this.title,
+					updated: this.updated,
+					published: this.published,
+					author: this.author,
+					categories: this.categories,
+					alternate: this.alternate,
+					origin: this.origin || false,
+					content: {content: this.text , direction: this.direction}
+				};
 	}
 	
 });

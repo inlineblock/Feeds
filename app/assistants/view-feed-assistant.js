@@ -29,7 +29,18 @@ ViewFeedAssistant = Class.create(Delicious.Assistant , {
 		
 		this.controller.setupWidget('articlesList' , this.attributes , this.model);
 		
-		this.feed.getArticles(this.getArticlesCallBack.bind(this) , Feeds.Preferences.getAllUnreadSettings());
+		if (!this.isOffline())
+		{
+			this.feed.getArticles(this.getArticlesCallBack.bind(this) , Feeds.Preferences.getAllUnreadSettings());
+		}
+		else
+		{
+			this.feed.getOfflineArticles(this.getOfflineArticlesCallBack.bind(this));
+			var loadMore = this.controller.get('loadMore');
+			var toggleIcon = this.controller.get('toggleIcon');
+			loadMore.hide();
+			toggleIcon.hide();
+		}
 		
 		this.controller.setupWidget(Mojo.Menu.appMenu , {} , {items:[{label: $L('Mark All As Read') , command: "markAllAsRead"}]});
 		
@@ -51,7 +62,7 @@ ViewFeedAssistant = Class.create(Delicious.Assistant , {
 		}
 		
 		var appIcon = this.controller.get('appIcon');
-		if (appIcon)
+		if (appIcon && !this.isOffline())
 		{
 			appIcon.observe(Mojo.Event.tap , this._refreshList);
 		}
@@ -115,6 +126,19 @@ ViewFeedAssistant = Class.create(Delicious.Assistant , {
 		else
 		{
 			return "view-feed/articleFeedItem";
+		}
+	},
+	
+	getOfflineArticlesCallBack: function(retreived)
+	{
+		this.hideLoader();
+		if (retreived)
+		{
+			this.articlesChanged();
+		}
+		else
+		{
+			this.errorDialog($L("There were no offline articles found for this feed."));
 		}
 	},
 	
@@ -303,7 +327,7 @@ ViewFeedAssistant = Class.create(Delicious.Assistant , {
 		var toggle = this.controller.get('toggleIcon');
 		if (toggle)
 		{
-			toggle.removeClassName('all').removeClassName('unread').addClassName(Feeds.Preferences.getAllUnreadSettings());
+			toggle.removeClassName('all').removeClassName('unread').removeClassName('starred').addClassName(Feeds.Preferences.getAllUnreadSettings());
 		}
 	}
 

@@ -120,18 +120,25 @@ Delicious.Assistant = Class.create({
 	
 	posNegDialog: function(titleText , msg , pos , neg , cb)
 	{
+		this.questionDialog(titleText , msg , pos , 'affirmative' , neg , 'dismiss' , cb);
+	},
+	
+	questionDialog: function(titleText , msg , posText , posClassName, negText , negClassName , cb)
+	{
 		titleText = titleText || "Title";
 		msg = msg || "message alert text";
-		pos = pos || "Continue";
-		neg = neg || "cancel";
+		posText = posText || "Continue";
+		posClassName = posClassName || '';
+		negText = negText || "cancel";
+		negClassName = negClassName || '';
 		cb = cb || function() {};
 		this.controller.showAlertDialog({
 			    onChoose: cb ,
 			    title: titleText,
 			    message: msg,
 			    choices:[
-			         {label:pos , value:true , type:'affirmative'},
-			         {label:neg , value:false , type:'dismiss'}
+			         {label:posText , value:true , type:posClassName},
+			         {label:negText , value:false , type:negClassName}
 			    ]
 			   });
 	},
@@ -157,15 +164,11 @@ Delicious.Assistant = Class.create({
 	
 	activateWindow: function()
 	{
-		if (Feeds.StageManager.stageExists(Feeds.Notifications.stageName))
-		{
-			Feeds.StageManager.close(Feeds.Notifications.stageName);
-		}
+		Feeds.Notifications.close();
 	},
 	
 	deactivateWindow: function()
 	{
-		Mojo.Log.info('--------deactivateWindow');
 		var notify = Feeds.Preferences.getNotificationSettings();
 		if (notify.enabled)
 		{
@@ -238,20 +241,31 @@ Delicious.Assistant = Class.create({
 					this.controller.stageController.pushScene('login');
 				break;
 				
+				case "goOnline":
+					window.setTimeout(this.goOnline.bind(this) , 500);
+				break;
+				
+				case "goOffline":
+					window.setTimeout(this.goOffline.bind(this) , 500);
+				break;
+				
 			}
 		}
 	},
 	
 	getAppMenu: function()
 	{
+		var appmenu = [];
 		if (Feeds.GoogleAccount.isLoggedIn())
 		{
-			return [{label: $L("Logout") , command: "logout"}];
+			appmenu.push({label: $L("Logout") , command: "logout"});
 		}
 		else
 		{
-			return [{label: $L("Login") , command: "login"}];
+			appmenu.push({label: $L("Login") , command: "login"});
 		}
+		
+		return appmenu;
 	},
 	
 	orientationChanged: function(orientation)
@@ -264,6 +278,21 @@ Delicious.Assistant = Class.create({
 		
 		this._orientation = orientation;
 		this.controller.window.PalmSystem.setWindowOrientation(this._orientation);
+	},
+	
+	isOffline: function()
+	{
+		return window.browseOffline;
+	},
+	
+	goOffline: function()
+	{
+	
+	},
+	
+	goOnline: function()
+	{
+		
 	}
 	
 });

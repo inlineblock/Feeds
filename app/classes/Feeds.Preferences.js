@@ -83,6 +83,10 @@ Feeds.Preferences = {
 			case 'unread':
 				return 'unread';
 			break;
+			
+			case 'starred':
+				return 'starred';
+			break;
 				
 			case 'all':
 			default:
@@ -97,6 +101,10 @@ Feeds.Preferences = {
 		{
 			case 'unread':
 				Feeds.Preferences.settings.allUnread = 'unread';
+			break;
+			
+			case 'starred':
+				Feeds.Preferences.settings.allUnread = 'starred';
 			break;
 				
 			case 'all':

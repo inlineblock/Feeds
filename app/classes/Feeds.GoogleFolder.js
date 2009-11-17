@@ -11,15 +11,19 @@ Feeds.GoogleFolder = Class.create({
 	className: "folder",
 	type: 'folder',
 	
-	initialize: function(manager , o)
+	initialize: function(manager , o , offlineMode)
 	{
+		offlineMode = offlineMode || false;
 		this.manager = manager;
 		this.id = o.id;
 		this.setTitle(o.label);
 		this.feeds = [];
 		this.display = [];
 		this.unreadCount = 0;
-		this.setupAllItemsFeed();
+		if (!offlineMode)
+		{
+			this.setupAllItemsFeed();
+		}
 	},
 	
 	setTitle: function(title)
@@ -84,6 +88,11 @@ Feeds.GoogleFolder = Class.create({
 		return this.manager.getRequestHeaders();
 	},
 	
+	getDepot: function()
+	{
+		return this.manager.getDepot();
+	},
+	
 	abortRequests: function()
 	{
 		if (this.ajaxRequest && this.ajaxRequest.transport && this.ajaxRequest.transport.abort)
@@ -92,6 +101,10 @@ Feeds.GoogleFolder = Class.create({
 		}
 	},
 	
+	getEditToken: function(callBack)
+	{
+		this.manager.getEditToken(callBack);
+	},
 	
 	markAllAsRead: function(callBack , editToken)
 	{
