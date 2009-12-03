@@ -123,6 +123,7 @@ Feeds.GoogleFeed = Class.create({
 	getOfflineArticles: function(callBack)
 	{
 		Mojo.Log.info('-----------getOfflineArticles');
+		this.articles = [];
 		this.manager.getDepot().get(this.id , this.getOfflineArticlesSuccess.bind(this , callBack) , this.getOfflineArticlesFailure.bind(this , callBack));
 	},
 	

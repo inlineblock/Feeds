@@ -42,8 +42,10 @@ ViewFeedAssistant = Class.create(Delicious.Assistant , {
 			toggleIcon.hide();
 		}
 		
-		this.controller.setupWidget(Mojo.Menu.appMenu , {} , {items:[{label: $L('Mark All As Read') , command: "markAllAsRead"}]});
-		
+		if (!this.isOffline())
+		{
+			this.controller.setupWidget(Mojo.Menu.appMenu , {} , {items:[{label: $L('Mark All As Read') , command: "markAllAsRead"}]});
+		}
 		this.setToggleClassName();
 	},
 	

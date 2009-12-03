@@ -27,7 +27,10 @@ ViewFolderAssistant = Class.create(Delicious.Assistant , {
 		
 		this.markIcon = this.controller.get('markIcon');
 		
-		this.controller.setupWidget(Mojo.Menu.appMenu , {} , {items:[{label: $L('Mark All As Read') , command: "markAllAsRead"}]});
+		if (!this.isOffline())
+		{
+			this.controller.setupWidget(Mojo.Menu.appMenu , {} , {items:[{label: $L('Mark All As Read') , command: "markAllAsRead"}]});
+		}
 		this.model.items = this.folder.display;
 		
 		this.controller.setupWidget('feedsList' , this.attributes , this.model);

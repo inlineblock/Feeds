@@ -105,6 +105,10 @@ ViewArticleAssistant = Class.create(Delicious.Assistant , {
 					return this.goToArticleLink();
 				break;
 				
+				case "share":
+					return this.shareArticle();
+				break;	
+				
 				case "star":
 					Mojo.Log.info('--handleCommand::star');
 					return this.checkStarArticle();
@@ -126,9 +130,11 @@ ViewArticleAssistant = Class.create(Delicious.Assistant , {
 		{
 			commandMenu.push({});
 		}
-		
-		commandMenu.push({ iconPath: 'images/starItem.png' , command: 'star'});
-		
+		if (!this.isOffline())
+		{
+			commandMenu.push({ iconPath: 'images/starItem.png' , command: 'star'});
+			commandMenu.push({ iconPath: 'images/share.png' , command: 'share'});
+		}
 		if (this.articleLink)
 		{
 			commandMenu.push({ icon: 'info' , command: 'articleLink'});
@@ -384,6 +390,56 @@ ViewArticleAssistant = Class.create(Delicious.Assistant , {
 		Mojo.Log.info('--removeStarCallBack::' , success);
 		this.hideLoader();
 		this.renderArticle();
+	},
+	
+	shareArticle: function()
+	{
+		this.controller.showAlertDialog({
+			    onChoose: this.shareArticleCallBack.bind(this) ,
+			    title: "Share This Article",
+			    message: "How would you like to share this article?",
+			    choices:[
+			         {label:$L("Email") , value:'email' , type:'none'},
+			         {label:$L("IM\\SMS") , value:'sms' , type:'none'},
+			         {label:$L("cancel") , value:false , type:'dismiss'},
+			    ]
+			   });
+	},
+	
+	shareArticleCallBack: function(type)
+	{
+		switch(type)
+		{
+			case 'email':
+				this.controller.serviceRequest('palm://com.palm.applicationManager', {
+					 method:'open',
+					 parameters:{  id: 'com.palm.app.email',
+					 				params: { summary: this.article.title , text:this.article.title + "  \
+					 				\
+					 				" + this.article.getArticleLink()}
+					 			 }
+					});
+			break;
+			
+			case 'sms':
+				this.controller.serviceRequest('palm://com.palm.applicationManager', {
+					 method:'open',
+					 parameters:{  id: 'com.palm.app.messaging',
+					 				params: { messageText:this.article.title + "  \
+					 				\
+					 				" + this.article.getArticleLink()}
+					 			 }
+					});
+			break;
+			
+			case 'twitter':
+			
+			break;
+			
+			default:
+				return false;
+			break;
+		}
 	}
 
 });

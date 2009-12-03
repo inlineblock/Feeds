@@ -105,8 +105,5 @@ Feeds.Notifications.disable = function()
 
 Feeds.Notifications.close = function()
 {
-	if (Feeds.StageManager.stageExists(Feeds.Notifications.stageName))
-	{
-		Feeds.StageManager.close(Feeds.Notifications.stageName);
-	}
+	Feeds.StageManager.close(Feeds.Notifications.stageName);
 }

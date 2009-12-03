@@ -24,5 +24,5 @@ SupportInfo = {
 	resources: [],
 	publisherURL: 'http://www.deliciousmorsel.com' ,
 	supportURL: 'http://www.deliciousmorsel.com/contact' ,
-	supportEmail: 'dennis@deliciousmorsel.com' ,
+	supportEmail: 'support@deliciousmorsel.com' ,
 };

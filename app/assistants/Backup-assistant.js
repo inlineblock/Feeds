@@ -10,8 +10,6 @@ BackupAssistant = Class.create({
 		this.manager = Feeds.GoogleAccount.getManager();
 		var loginInfo = Feeds.GoogleAccount.getLogin();
 		
-		
-		
 		this.manager.login(loginInfo.email , loginInfo.password , this.loginCallBack.bind(this));
 		
 		var offline = Feeds.Preferences.getOfflineSettings();
@@ -23,7 +21,6 @@ BackupAssistant = Class.create({
 	{
 		this.stop = true;
 	},
-	
 	
 	loginCallBack: function(success)
 	{
@@ -78,7 +75,7 @@ BackupAssistant = Class.create({
 	removeFeedAndSpawn: function(feed)
 	{
 		this.feeds = this.feeds.without(feed);
-		window.setTimeout(this.feedSpawner.bind(this) , 100);
+		window.setTimeout(this.feedSpawner.bind(this) , 300);
 	},
 	
 	complete: function()

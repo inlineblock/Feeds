@@ -28,8 +28,19 @@ NotificationAssistant = Class.create({
 	
 	onTap: function()
 	{
-		Feeds.StageManager.newCard('main' , 'main' , {manager: this.manager , fullRefresh: true});
+		Feeds.StageManager.close('main');
+		window.setTimeout(this.openMain.bind(this) , 100);
+		window.setTimeout(this.close.bind(this) , 600);
+	},
+	
+	close: function()
+	{
 		Feeds.Notifications.close();
+	},
+	
+	openMain: function()
+	{
+		Feeds.StageManager.newCard('main' , 'main' , {manager: this.manager , fullRefresh: true});
 	}
 
 });
