@@ -19,22 +19,27 @@ ViewArticleAssistant = Class.create(Delicious.Assistant , {
 		this._onDragging = this.onDragging.bindAsEventListener(this);
 		this._onDragEnd = this.onDragEnd.bindAsEventListener(this);
 		this._onMouseUp = this.onMouseUp.bindAsEventListener(this);
+		this._articleHeaderHold = this.articleHeaderHold.bind(this);
 	},
 	
 	setup: function()
 	{
-		//var title = this.controller.get('articleTitle');
-		//title.innerHTML = this.article.title;
 		var landscape = Feeds.Preferences.getLandscapeSettings();
 		if (landscape.gestures)
 		{
 			this.controller.useLandscapePageUpDown(true);
 		}
-		
 		this.renderArticle();
 		
 		var commandMenu = this.getCommandMenu();
 		this.controller.setupWidget(Mojo.Menu.commandMenu , {menuClass: 'no-fade'} , {items: commandMenu});
+		this.controller.setupWidget(Mojo.Menu.appMenu , {} , {visible: true , items: [{label: "Mark as Unread" , command: "unread"}]});
+		
+		this.mainHdr = this.controller.get('main-header');
+		if (this.mainHdr)
+		{
+			this.mainHdr.observe(Mojo.Event.hold , this._articleHeaderHold);
+		}
 	},
 	
 	renderArticle: function()
@@ -49,8 +54,7 @@ ViewArticleAssistant = Class.create(Delicious.Assistant , {
 	activate: function()
 	{
 		//this.activateScrollTop();
-		this.article.markAsRead();
-		
+		this.markAsRead();
 		this.controller.setMenuVisible(Mojo.Menu.commandMenu , true);
 	},
 	
@@ -61,7 +65,11 @@ ViewArticleAssistant = Class.create(Delicious.Assistant , {
 	},
 	
 	cleanup: function()
-	{
+	{	
+		if (this.mainHdr)
+		{
+			this.mainHdr.stopObserving(Mojo.Event.hold , this._articleHeaderHold);
+		}
 		this.removeAnchorFix();
 		this.deattachLoadImage();
 		this.article.abortRequests();
@@ -89,10 +97,23 @@ ViewArticleAssistant = Class.create(Delicious.Assistant , {
 	
 	handleCommand: function(event)
 	{
+		if (event.type == Mojo.Event.commandEnable && (event.command == Mojo.Menu.helpCmd || event.command == Mojo.Menu.prefsCmd)) 
+		{
+         	event.stopPropagation(); // enable help. now we have to handle it
+		}
+		
 		if (event.type == Mojo.Event.command) 
 		{
 			switch (event.command) 
 			{
+				case Mojo.Menu.prefsCmd:
+					this.controller.stageController.pushScene('preferences');
+				break;
+				
+				case Mojo.Menu.helpCmd:
+					this.controller.stageController.pushScene('support');
+				break;
+				
 				case "previousArticle":
 					return this.goToPreviousArticle();
 				break;
@@ -107,10 +128,13 @@ ViewArticleAssistant = Class.create(Delicious.Assistant , {
 				
 				case "share":
 					return this.shareArticle();
+				break;
+				
+				case "unread":
+					return this.markAsUnread();
 				break;	
 				
 				case "star":
-					Mojo.Log.info('--handleCommand::star');
 					return this.checkStarArticle();
 				break;
 			}
@@ -356,12 +380,10 @@ ViewArticleAssistant = Class.create(Delicious.Assistant , {
 		this.showLoader();
 		if (this.article.isStarred())
 		{
-			Mojo.Log.info('--checkStarArticle::unmarkAsStarred');
 			this.questionDialog('Remove Star' , "Are you sure you'd like to unstar this article?" , 'Yes, unstar it.' , 'negative', 'cancel' , '' , this.removeStarConfirm.bind(this))
 		}
 		else
 		{
-			Mojo.Log.info('--checkStarArticle::markAsStarred');
 			this.article.markAsStarred(this.addStarCallBack.bind(this));
 		}
 	},
@@ -380,14 +402,12 @@ ViewArticleAssistant = Class.create(Delicious.Assistant , {
 	
 	addStarCallBack: function(success)
 	{
-		Mojo.Log.info('--addStarCallBack::' , success);
 		this.hideLoader();
 		this.renderArticle();
 	},
 	
 	removeStarCallBack: function(success)
 	{
-		Mojo.Log.info('--removeStarCallBack::' , success);
 		this.hideLoader();
 		this.renderArticle();
 	},
@@ -440,6 +460,28 @@ ViewArticleAssistant = Class.create(Delicious.Assistant , {
 				return false;
 			break;
 		}
+	},
+	markAsRead: function()
+	{
+		this.article.markAsRead();
+		if (this.mainHdr)
+		{
+			this.mainHdr.addClassName('has-been-read');
+		}
+	},
+	
+	markAsUnread: function()
+	{
+		this.article.markAsUnread();
+		if (this.mainHdr)
+		{
+			this.mainHdr.removeClassName('has-been-read');
+		}
+	},
+	
+	articleHeaderHold: function()
+	{
+		this.markAsUnread();
 	}
 
 });

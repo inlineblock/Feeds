@@ -30,7 +30,7 @@ Feeds.GoogleManager  = Class.create({
 	
 	getRequestHeaders: function()
 	{
-		return {'Cookie': 'SID=' + this.SID};
+		return {'Authorization': 'GoogleLogin auth=' + this.SID};
 	},
 	
 	setLogin: function(email , password)
@@ -44,13 +44,14 @@ Feeds.GoogleManager  = Class.create({
 		this.SID = sid;
 	},
 	
-	login: function(email , password , callBack)
+	login: function(email , password , callBack , force)
 	{
 		this.email = email;
 		this.password = password;
 		var callBack = callBack || Mojo.doNothing;
+		force = force || false;
 		
-		if (this.initSID())
+		if (!force && this.initSID())
 		{
 			return callBack(true);
 		}
@@ -62,12 +63,17 @@ Feeds.GoogleManager  = Class.create({
 	
 	loginSuccess: function(callBack , t)
 	{
+		callBack = callBack || Mojo.doNothing;
 		if (t.status != 200 || t.responseText.indexOf('SID=') == -1) return this.loginFailure(callBack);
-		var start = t.responseText.indexOf('SID=') + 4;
-		var end = t.responseText.indexOf('LSID=') - 5;
-		var sid = t.responseText.substr(start , end);
-		this.setSID(sid);
-		this.storeSID(sid);
+		var parts = t.responseText.split("\n"), groups = {};
+		if (!parts || parts.length < 1) return this.loginFailure(callBack);
+		parts.each(function(p) {
+			var g = p.split('=');
+			groups[g[0]] = g[1];
+		} , this);
+		if (!groups.Auth) return this.loginFailure(callBack);
+		this.setSID(groups.Auth);
+		this.storeSID(groups.Auth);
 		callBack(true);
 	},
 	
@@ -79,6 +85,7 @@ Feeds.GoogleManager  = Class.create({
 	
 	getAllFeedsList: function(callBack)
 	{
+		Mojo.Log.info('++-+-+---getAllFeedsList');
 		this.resetAllFeeds();
 		if (this.offlineMode) return this.getFeedsFromDepot(callBack);
 		
@@ -119,7 +126,7 @@ Feeds.GoogleManager  = Class.create({
 	getFeedsFailure: function(callBack , t)
 	{
 		callBack = callBack || Mojo.doNothing();
-		callBack(false);
+		callBack(false , (t.status || 0));
 	},
 	
 	updateUnreadCount: function(callBack)
@@ -227,7 +234,9 @@ Feeds.GoogleManager  = Class.create({
 		var token = this.getLastEditToken();
 		if (!token)
 		{
+			
 			var params = {method:'get' , onSuccess: this.getEditTokenSuccess.bind(this , callBack) , onFailure: this.getEditTokenFailure.bind(this , callBack)};
+			params.requestHeaders = this.getRequestHeaders();
 			this.getTokenAjax = new Ajax.Request('http://www.google.com/reader/api/0/token' , params);
 		}
 		else

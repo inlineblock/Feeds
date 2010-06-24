@@ -16,8 +16,6 @@ AppAssistant = Class.create({
 	
 	handleLaunch: function(o)
 	{
-		Mojo.Log.info('--appAssistant::handleLaunch timeStamp: ' , Delicious.getTimeStamp());
-		if (Delicious.getTimeStamp() > 1260593307) return;
 		var o = o || {};
 		if (o.checkForUpdates)
 		{

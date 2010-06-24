@@ -28,9 +28,8 @@ NotificationAssistant = Class.create({
 	
 	onTap: function()
 	{
-		Feeds.StageManager.close('main');
-		window.setTimeout(this.openMain.bind(this) , 100);
-		window.setTimeout(this.close.bind(this) , 600);
+		window.setTimeout(this.openMain.bind(this) , 250);
+		window.setTimeout(this.close.bind(this) , 1000);
 	},
 	
 	close: function()

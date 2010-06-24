@@ -1,4 +1,7 @@
 Feeds.Preferences = {
+	fontSizeClassPrefix: 'fontsize-',
+	fontSizes: ['small' , 'medium' , 'large'],
+	
 	getCount: function()
 	{
 		Feeds.Preferences.initAllPreferences();
@@ -128,6 +131,28 @@ Feeds.Preferences = {
 	{
 		Feeds.Preferences.initAllPreferences();
 		return (Feeds.Preferences.settings.darkTheme ? true : false);
+	},
+	
+	getFontSize: function()
+	{
+		Feeds.Preferences.initAllPreferences();
+		var fz = Feeds.Preferences.settings.fontSize || 'medium';
+		if (Feeds.Preferences.fontSizes.indexOf(fz) === -1)
+		{
+			fz = Feeds.Preferences.fontSizes[1];
+		}
+		return fz;
+	},
+	
+	setFontSize: function(fz)
+	{
+		
+		if (Feeds.Preferences.fontSizes.indexOf(fz) === -1)
+		{
+			fz = Feeds.Preferences.fontSizes[1];
+		}
+		Feeds.Preferences.settings.fontSize = fz;
+		Feeds.Preferences.saveAll();
 	},
 	
 	/// LANDSCAPE
@@ -317,5 +342,30 @@ Feeds.Preferences = {
 		//Mojo.Log.info('-------setNotificationSettings' , Object.toJSON(set));
 		Feeds.Preferences.settings.notifications = set;
 		Feeds.Preferences.saveAll();
+	},
+	
+	applyThemeToBody: function(body)
+	{
+		var theme = Feeds.Preferences.getDarkTheme();
+		if (theme)
+		{
+			body.addClassName('palm-dark');
+		}
+		else
+		{
+			body.removeClassName('palm-dark');
+		}
+		
+		var fontSize = Feeds.Preferences.getFontSize();
+		var fontClass = Feeds.Preferences.fontSizeClassPrefix + fontSize;
+		if (!body.hasClassName(fontClass))
+		{
+			Feeds.Preferences.fontSizes.each(function(f) {
+				body.removeClassName(Feeds.Preferences.fontSizeClassPrefix + f);
+			});
+			body.addClassName(fontClass);
+		}
+		
+		Mojo.Log.info('-----applyThemeToBody ' , body.className);
 	}
 };

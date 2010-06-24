@@ -20,6 +20,11 @@ PreferencesAssistant = Class.create(Delicious.Assistant , {
 		this.darkThemeModel = {value: Feeds.Preferences.getDarkTheme()};
 		this.controller.setupWidget('darkThemeToggle' , { trueValue: true , falseValue: false } , this.darkThemeModel);
 		
+
+		this.fontSizeChoices = [{label : 'Small', value: 'small'},{label : 'Medium', value : 'medium'},{label : 'Large', value : 'large'}];
+		this.fontSizeModel = {value: Feeds.Preferences.getFontSize()};
+		this.controller.setupWidget('fontSizeSelector', {label: $L("Font Size") , choices: this.fontSizeChoices} , this.fontSizeModel);
+		
 		
 		
 		var landscape = Feeds.Preferences.getLandscapeSettings();
@@ -60,7 +65,7 @@ PreferencesAssistant = Class.create(Delicious.Assistant , {
 		this.controller.setupWidget('offlineNotificationToggle' , { trueValue: true , falseValue: false } , this.offlineFetchNotficationsModel);
 		
 		
-		
+		this.body = this.controller.getSceneScroller().up('body');
 
 	},
 	
@@ -71,6 +76,8 @@ PreferencesAssistant = Class.create(Delicious.Assistant , {
 		
 		var darkThemeToggle = this.controller.get('darkThemeToggle');
 		darkThemeToggle.observe(Mojo.Event.propertyChange, this._onThemeChange);
+		var fontSizeSelector = this.controller.get('fontSizeSelector');
+		fontSizeSelector.observe(Mojo.Event.propertyChange, this._onThemeChange);
 		
 		var landscapeModeToggle = this.controller.get('landscapeModeToggle');
 		landscapeModeToggle.observe(Mojo.Event.propertyChange, this._landscapeChange);
@@ -95,6 +102,8 @@ PreferencesAssistant = Class.create(Delicious.Assistant , {
 		
 		var darkThemeToggle = this.controller.get('darkThemeToggle');
 		darkThemeToggle.stopObserving(Mojo.Event.propertyChange, this._onThemeChange);
+		var fontSizeSelector = this.controller.get('fontSizeSelector');
+		fontSizeSelector.stopObserving(Mojo.Event.propertyChange, this._onThemeChange);
 		
 		var landscapeModeToggle = this.controller.get('landscapeModeToggle');
 		landscapeModeToggle.stopObserving(Mojo.Event.propertyChange, this._landscapeChange);
@@ -127,14 +136,12 @@ PreferencesAssistant = Class.create(Delicious.Assistant , {
 	{
 		var val = this.darkThemeModel.value;
 		Feeds.Preferences.setDarkTheme(val);
-		if (val)
-		{
-			this.controller.getSceneScroller().up('body').addClassName('palm-dark');
-		}
-		else
-		{
-			this.controller.getSceneScroller().up('body').removeClassName('palm-dark');
-		}
+		
+		var fz = this.fontSizeModel.value;
+		Feeds.Preferences.setFontSize(fz);
+		
+		Feeds.Preferences.applyThemeToBody(this.body);
+		
 	},
 	
 	landscapeChange: function()

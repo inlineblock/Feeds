@@ -7,10 +7,10 @@ MainAssistant = Class.create(Delicious.Assistant , {
 		{
 			this.manager = o.manager;
 		}
-		
+		this.getAttempts = 0;
 		this.model = {listTitle: 'Feeds' , items: []};
 		this.attributes = { itemTemplate: "main/feedItem" , listTemplate: "main/list" ,
-             				swipeToDelete: true , reorderable: false , renderLimit: 500 };
+             				swipeToDelete: false , reorderable: false , renderLimit: 500 };
         this.createListeners();
 	},
 	
@@ -24,10 +24,7 @@ MainAssistant = Class.create(Delicious.Assistant , {
 	
 	setup: function()
 	{
-		if (Feeds.Preferences.getDarkTheme())
-		{
-			this.controller.getSceneScroller().up('body').addClassName('palm-dark');
-		}
+		Feeds.Preferences.applyThemeToBody(this.controller.getSceneScroller().up('body'));
 		
 		this.markIcon = this.controller.get('markIcon');
 		
@@ -77,7 +74,6 @@ MainAssistant = Class.create(Delicious.Assistant , {
 			else
 			{
 				this.msgDialog($L('Welcome to Feeds') , $L('Thank you for downloading Feeds, the premier Google Reader client for WebOS. <br/>We will now have you login to Google Reader and to start.') , this.forceLogin.bind(this));
-				//this.controller.stageController.pushScene('login' , {});
 				this.hideLoader();
 			}
 		}
@@ -302,7 +298,7 @@ MainAssistant = Class.create(Delicious.Assistant , {
 		this.hideLoader();
 	},
 	
-	getAllFeedsCallBack: function(success)
+	getAllFeedsCallBack: function(success , errorcode)
 	{
 		if (success)
 		{
@@ -312,13 +308,31 @@ MainAssistant = Class.create(Delicious.Assistant , {
 		}
 		else
 		{
-			this.errorDialog("Unable to load feeds from Google Reader.");
+			if (errorcode && errorcode == 401 && this.getAttempts < 1)
+			{
+				this.getAttempts = 1;
+				Mojo.Controller.getAppController().showBanner("Re-authenticating...", {source: 'notification'});
+				window.setTimeout((function() {
+					var loginInfo = Feeds.GoogleAccount.getLogin();
+					this.manager.login(loginInfo.email , loginInfo.password , this.loginComplete.bind(this) , true);
+				}).bind(this) , 300);
+			}
+			else
+			{
+				this.errorDialog("Unable to load feeds from Google Reader.");
+			}
 		}
 		this.hideLoader();
 	},
 	
 	markAllAsRead: function()
 	{
+		this.questionDialog("Mark All As Read" , "Are you sure you want to mark everything as read?" , "Mark As Read" , "", "cancel" , "secondary" , this.markAllAsReadPost.bind(this));
+	},
+	
+	markAllAsReadPost: function(doit)
+	{
+		if (!doit) return false;
 		this.manager.markAllAsRead(this.markAllAsReadCallBack.bind(this));
 		if (this._isRefreshing) return;
 		

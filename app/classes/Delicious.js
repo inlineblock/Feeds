@@ -1,7 +1,3 @@
-console = console || {};
-console.log = console.log || function(){ apply(console.delicious , $A(arguments)); };
-console.dir = console.dir || function(){ apply(console.delicious , $A(arguments)); };
-// console.delicious = function() { args = $A(arguments); for(var i=0; i< args.length; i++) { if (!Object.isString(args[i])) { args[i] = Object.toJSON(args[i]); }} apply(Mojo.Log.info , args);  }
 Delicious = {
 	getTimeStamp: function()
 	{

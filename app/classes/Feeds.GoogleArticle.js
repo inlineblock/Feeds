@@ -148,7 +148,7 @@ Feeds.GoogleArticle = Class.create({
 		}
 		var params = {method:'post' ,  onSuccess: this.markAsReadSuccess.bind(this , callBack) , onFailure: this.markAsReadFailure.bind(this , callBack)};
 		params.requestHeaders = this.feed.manager.getRequestHeaders();
-		params.parameters = {'T':token , a: this.getUnreadTag() , async: 'true' , i: this.id , s:this.feed.id}; 
+		params.parameters = {'T':token , a: this.getUnreadTag() , async: 'true' , i: this.id , s:this.feed.id};
 		this.ajaxRequest = new Ajax.Request('http://www.google.com/reader/api/0/edit-tag?client=PalmPre' , params);
 		
 	},
@@ -164,6 +164,43 @@ Feeds.GoogleArticle = Class.create({
 	},
 	
 	markAsReadFailure: function(callBack , t)
+	{
+		callBack = callBack || Mojo.doNothing;
+		callBack(false);
+	},
+	
+	
+	markAsUnread: function(callBack , token)
+	{
+		callBack = callBack || Mojo.doNothing;
+		if (!this.hasBeenRead()) return callBack(false);
+		
+		var token = token || false;
+		if (token === -1) return callBack(false);
+		if (!token)
+		{
+			this.feed.manager.getEditToken(this.markAsUnread.bind(this , callBack));
+			return;
+		}
+		var params = {method:'post' ,  onSuccess: this.markAsUnreadSuccess.bind(this , callBack) , onFailure: this.markAsUnreadFailure.bind(this , callBack)};
+		params.requestHeaders = this.feed.manager.getRequestHeaders();
+		params.parameters = {'T':token , a: "user/-/state/com.google/kept-unread" , async: 'true' , i: this.id , s: this.feed.id , r: this.getUnreadTag()};
+		this.ajaxRequest = new Ajax.Request('http://www.google.com/reader/api/0/edit-tag?client=PalmPre' , params);
+		
+	},
+	
+	markAsUnreadSuccess: function(callBack , t)
+	{
+		callBack = callBack || Mojo.doNothing;
+		Mojo.Log.info('m' , t.responseText);
+		if (t.status == 200)
+		{
+			this.incrementFeedUnreadCount();
+		}
+		callBack(true);
+	},
+	
+	markAsUnreadFailure: function(callBack , t)
 	{
 		callBack = callBack || Mojo.doNothing;
 		callBack(false);
@@ -242,6 +279,13 @@ Feeds.GoogleArticle = Class.create({
 		this.feed.unreadCount--;
 		this.categories.push(this.getUnreadTag());
 		this.removeClassName('unread');
+	},
+	
+	incrementFeedUnreadCount: function(t)
+	{
+		this.feed.unreadCount++;
+		this.categories = this.categories.without(this.getUnreadTag());
+		this.addClassName('unread');
 	},
 	
 	getUnreadTag: function()

@@ -8,7 +8,7 @@ Delicious.StageManager = Class.create({
 	
 	stageExists: function(uniqueid)
 	{
-		return (this.controller.getStageProxy(uniqueid) && this.controller.getStageController(uniqueid));
+		return (this.controller.getStageController(uniqueid) ? true : false);
 	},
 	
 	newCard: function(uniqueid , stage , o)
@@ -87,7 +87,12 @@ Delicious.StageManager = Class.create({
 	close: function(uniqueid)
 	{
 		if (!uniqueid) return;
-		this.controller.closeStage(uniqueid);
+		//this.controller.closeStage(uniqueid);
+		var stage = this.controller.getStageController(uniqueid);
+		if (stage && stage.window && stage.window.close)
+		{
+			stage.window.close();
+		}
 	}
 	
 });

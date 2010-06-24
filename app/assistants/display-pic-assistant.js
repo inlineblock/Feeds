@@ -65,35 +65,63 @@ DisplayPicAssistant = Class.create(Delicious.Assistant , {
 			switch(event.command)
 			{
 				case 'savePhoto':
-					var onSuccess = this.onSuccessPhotoSave.bind(this);
-					var onFailure = this.onFailurePhotoSave.bind(this);
-					var imgurl = this.imageURL;
-					var mimeExt = this.imageURL.substring(this.imageURL.length - 3 , this.imageURL.length);
-					this._downloadRequest = new Mojo.Service.Request('palm://com.palm.downloadmanager', {
-							method: 'download',
-						parameters: {
-							'target': imgurl,
-							'targetDir': '/media/internal/downloads',
-							'mime': 'image/' + mimeExt
-							},
-						'onSuccess': onSuccess,
-						'onFailure': onFailure
-					});
+					this.downloadImage();
 				    
 				break;
 			}
 		}
 	},
 	
-	onSuccessPhotoSave: function(e)
+	downloadImage: function()
 	{
-		Mojo.Log.info("PhotoSAVE----" , Object.toJSON(e));
-		var banner = this.controller.showBanner({messageText: "Photo saved successfully." , icon: "Feeds"} , {} , "Feeds");
+		var imgurl = this.imageURL.replace(' ' , '%20'),
+			targetFilename = Delicious.getTimeStamp() + "_img." + imgurl.substr(-3),
+			targetFolder = '/media/internal/' + Mojo.Controller.appInfo.title.replace(' ' , '_') + '/';
+		try
+    	{
+    		this.controller.serviceRequest('palm://com.palm.downloadmanager/', 
+    		{
+    			method: 'download',
+    			parameters: {
+    					target: imgurl,
+    					targetDir: targetFolder,
+    					targetFilename: targetFilename,
+    					keepFilenameOnRedirect: false,
+    					subscribe: false
+    				     },
+    			onSuccess: Mojo.doNothing,		
+    			onFailure: Mojo.doNothing
+    		})
+    	}	
+    	catch(e)
+    	{}
+    	
+    	try
+    	{
+    		this.controller.serviceRequest('palm://com.palm.downloadmanager/',
+    		{
+    			method: 'download',
+    			parameters: {
+    					target: imgurl,
+    					targetDir: targetFolder,
+    					targetFilename: targetFilename,
+    					keepFilenameOnRedirect: false,
+    					subscribe: true
+    				    },
+				onSuccess: this.downloadResponse.bind(this),
+         		onFailure: Mojo.doNothing
+    		})
+    	}	
+    	catch(e)
+    	{}
 	},
 	
-	onFailurePhotoSave: function()
+	downloadResponse: function(response)
 	{
-		var banner = this.controller.showBanner({messageText: "Unable to save photo. " , icon: "Feeds"} , {} , "Feeds");
+		if (response.completed)
+		{
+			this.controller.showBanner({messageText: "Image saved successfully." , icon: "Feeds"} , {} , "Feeds");
+		}
 	},
 	
 	activate: function(event)

@@ -10,15 +10,11 @@ SupportAssistant = Class.create({
 		var i = 0;
 		if(typeof SupportInfo.publisherURL !== "undefined" && SupportInfo.publisherURL)
 		{
-			supportitems[i++] = {text: Mojo.Controller.appInfo.company + ' Website', detail:$L(SupportInfo.publisherURL), Class:$L('img_web'),type:'web'};
-		}
-		if(typeof SupportInfo.supportURL !== "undefined" && SupportInfo.supportURL)
-		{
-			supportitems[i++] = {text: 'Support Website' , detail:$L(SupportInfo.supportURL) , Class:$L("img_web"),type:'web'}
+			supportitems[i++] = {text: Mojo.Controller.appInfo.company + "'s Website", detail:$L(SupportInfo.publisherURL), Class:$L('img_web'),type:'web'};
 		}
 		if(typeof SupportInfo.supportEmail !== "undefined" && SupportInfo.supportEmail)
 		{
-			supportitems[i++] = {text: 'Send Email',address: SupportInfo.supportEmail , subject: Mojo.Controller.appInfo.title + " Support", Class:$L("img_email"),type:'email'}
+			supportitems[i++] = {text: 'Send Email',address: SupportInfo.supportEmail , subject: Mojo.Controller.appInfo.title + " v" + Mojo.Controller.appInfo.version + " Support", Class:$L("img_email"),type:'email'}
 		}
 		
 		this.controller.setupWidget('AppSupport_list', 

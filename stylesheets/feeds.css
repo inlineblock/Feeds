@@ -19,6 +19,25 @@
 	background: url(../images/refresh.png) no-repeat center center;
 	padding: 10px 0px 0px 5px;
 }
+.clear {
+	clear: both;
+}
+body
+{
+	font-size: 20px;
+}
+
+body.fontsize-small
+{
+	font-size: 15px;
+}
+
+body.fontsize-large
+{
+	font-size: 25px;
+}
+
+
 body.offline .refresh_icon {
 	width:40px; 
 	background: url(../images/working_offline.png) no-repeat center center;
@@ -111,7 +130,7 @@ body.offline .refresh_icon {
 }
 .palm-page-header.fixed .title
 {
-	font-size:24px;
+	font-size:1.2em;
 	padding: 10px 60px 13px 56px;
 	position:relative;
 	width:auto;
@@ -180,83 +199,108 @@ body.offline #markIcon
 {
 	background: url(../images/toggle_starred.png) no-repeat center;
 }
-.feedItem
+#feedList .feedItem
 {
-	position:relative;
-	height:50px;
+	min-height: 20px;
+	height: auto;
+	position: relative;
 }
 
-.feedItem.folder .icon
+#feedList .selected > .palm-row-wrapper,
+#feedList .selected > .palm-row.palm-swipe-delete,
+#feedList .selected > .palm-delete-element,
+#feedList .selected > .palm-reorder-element
+{
+	margin: 0px;
+}
+#feedList .selected
+{
+	margin: 0px;
+	padding: 0px;
+	border-width: 1px;
+}
+#feedList .feedItem.folder .icon
 {
 	position: absolute;
-	top:10px;
-	left:5px;
-	width:32px;
+	top: 50%;
+	left: 5px;
+	margin-top: -16px;
+	width: 32px;
 	height: 32px;
 	background: transparent url('../images/folder.png') center center no-repeat;
 }
-.feedItem.feed .icon
+#feedList .feedItem.feed .icon
 {
 	position: absolute;
-	top:8px;
+	top: 50%;
 	left:6px;
+	margin-top: -16px;
 	width:32px;
 	height: 32px;
 	background: transparent url('../images/feed.png') center center no-repeat;
 }
-.feedItem.psuedo .icon
+
+#feedList .feedItem.psuedo .icon
 {
 	position: absolute;
-	top:8px;
+	top:50%;
 	left:6px;
-	width:32px;
+	margin-top: -16px;
+	width: 32px;
 	height: 32px;
 	background: transparent url('../images/all-items.png') center center no-repeat;
 }
 
-.feedItem .title
+#feedList .feedItem .title
 {
-	position: relative;
-	top:0px;
-	line-height: 50px;
-	
+	line-height: 2.25em;
+	font-size: 1em;
 	padding:0 55px 0 45px;
-	height:50px;
 	text-overflow: ellipsis;
 	overflow: hidden;
 	white-space: nowrap;
 }
-.feedItem .unreadCount
+#feedList .feedItem .unreadCount
 {
 	position: absolute;
-	height:30px;
-	min-width:26px;
-	padding:0 2px;
-	color:#5E7C90;
-	top:8px;
-	right:10px;
+	min-width: 26px;
+	padding: 0 2px;
+	top: 50%;
+	right: 10px;
 	text-align: center;
-	font-size: 15px;
+	font-size: 0.7em;
 	text-shadow: 1px 1px 1px #BBBBBB;
 	border: 2px solid #B0B0B0;
 	border-radius: 10px;
+	margin-top: -15px;
 	-webkit-border-radius: 10px;
 }
-.feedItem .unreadCount span
+.fontsize-small #feedList .feedItem .unreadCount
 {
-	margin:0 auto;
-	width:100%;
-	text-align: center;
-	line-height: 29px;
+	border-width: 1px;
+	border-radius: 6px;
+	margin-top: -11px;
 }
-.feedItem.starred .unreadCount
+.fontsize-large #feedList .feedItem .unreadCount
+{
+	margin-top: -20px;
+}
+#feedList .feedItem .unreadCount span
+{
+	display: block;
+	margin:0 auto;
+	text-align: center;
+	line-height: 2em;
+}
+#feedList .feedItem.starred .unreadCount
 {
 	background: transparent url(../images/starred.png) center center no-repeat;
 	width: 30px;
 	height: 30px;
+	margin-top: -15px;
 	border: none;
 }
-.feedItem.starred .unreadCount span
+#feedList .feedItem.starred .unreadCount span
 {
 	display: none;
 }
@@ -291,7 +335,7 @@ body.offline #markIcon
 
 div.sectionHead
 {
-	font-size:14px;
+	font-size:0.8em;
 	font-weight:bold;
 	text-transform: uppercase;
 	vertical-align: middle;
@@ -342,8 +386,17 @@ div#main-header div.feedTitle
 div#article
 {
 	margin:10px 5px 25px 5px;
-	font-size:0.8em;
+	font-size: 20px;
 }
+body.fontsize-small div#article
+{
+	font-size: 15px;
+}
+body.fontsize-large div#article
+{
+	font-size: 24px;
+}
+
 div#article img
 {
 	max-width: 100%;
@@ -359,7 +412,7 @@ div#feedList .articleItem.starred .palm-row-wrapper
 }
 div#feedList .articleItem div.title
 {
-	font-size:.9em;
+	font-size:0.9em;
 	padding:4px 6px;
 }
 div#feedList .articleItem.starred div.title
@@ -416,4 +469,12 @@ div#feedList .articleItem.starred .starred
 	position: absolute;
 	top:5px;
 	right: 5px;
+}
+div#main-header.article div#articleTitle
+{
+	font-weight: bold;
+}
+div#main-header.article.has-been-read div#articleTitle
+{
+	font-weight: lighter;
 }
