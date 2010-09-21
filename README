@@ -1,0 +1,5 @@
+Feeds is a Google Reader client for Palm WebOS.
+Delicious Morsel LLC has decided to open source all code related to Feeds, under the MIT License.
+
+The Palm WebOS SDK is required to make a proper build.
+Please file bugs here on GitHub and feel free to contribute code.
